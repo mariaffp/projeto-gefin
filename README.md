@@ -1,2 +1,20 @@
 # projeto-gefin
-Sistema web para gestão financeira com autenticação, importação de dados, dashboards integrados e relatórios, feito durante o processo seletivo da Focus pela equipe HorizonSolutions
+GEFIN
+Sistema web para gestão financeira desenvolvido pela equipe da HorizonSolutions no processo seletivo da Focus em 2026.1.
+O intuito do sistema é centralizar o controle de transações, fluxo de caixa, dashboards e relatórios financeiros.
+
+A plataforma permite a importação dos extratos bancários em CSV e PDF, categorização de movimentações, geração de relatórios e visualização de indicadores financeiros em dashboards interativos.
+
+ Tecnologias utilizadas:
+ - Python
+ - Flask
+ - PostgreSQL
+ - Supabase
+ - Dash
+ - Plotly
+ - HTML, CSS e Javascript
+ - Pandas
+
+ Equipe:
+ 
+
