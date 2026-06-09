@@ -103,42 +103,31 @@ layout = dbc.Container(
 
                                     dbc.Button(
                                         [
-                                            html.Div(
-                                                html.Img(
-                                                    src="/assets/google.png",
-                                                    style={
-                                                        "display": "flex",
-                                                        "alignItems": "center",
-                                                        "marginRight": "10px",
-                                                        "width": "30px"
-                                                        }
-                                                ),
-                                                style={
-                                                    "padding": "1px",
-                                                    "borderRadius": "2px",
-                                                    "marginRight": "30px",
-                                                    "display": "inline-block",
-                                                    "position": "absolute",
-                                                    "top": "500px",
-                                                    "right": "520px"
-                                                }
-                                            ),
-                                            html.Span("Acessar utilizando Google")
-                                        ],
-                                        id="btn-google",
-                                        className="w-100",
-                                        style={
-                                            "backgroundColor": COR_BOTAO,
-                                            "borderColor": COR_BOTAO,
-                                            "color": COR_TEXTO_BRANCO,
-                                            "fontSize": "1.1rem",
-                                            "alignItems": "center",
-                                            "justifyContent": "center",
-                                            "gap": "15px"
-                                        }
-                                    )
-                                ])
-                            ],
+                            
+                                            html.Img(
+                                            src="/assets/google.png",
+                                            style={
+                                                "width": "24px",
+                                                "marginRight": "10px",
+                                                "verticalAlign": "middle"
+                                            }
+                                        ),
+                                        html.Span("Acessar utilizando Google")
+                                    ],
+                                    id="btn-google",
+                                    className="w-100",
+                                    style={
+                                        "backgroundColor": COR_BOTAO,
+                                        "borderColor": COR_BOTAO,
+                                        "color": COR_TEXTO_BRANCO,
+                                        "fontSize": "1.1rem",
+                                        "display": "flex",
+                                        "alignItems": "center",
+                                        "justifyContent": "center",
+                                    }
+                                )
+                            ])
+                        ],
                             style={"width": "100%", "maxWidth": "450px"}
                         )
                     ],
@@ -169,9 +158,9 @@ def login_email(n_clicks, email, senha):
         return "",dash.no_update
     try: #tenta enviar as credenciais pro supabase autenticar
         supabase.auth.sign_in_with_password({"email": email, "password": senha})
-        return "/dashboard" #se der certo, redireciona para a pagina principal do sistema
+        return "","/dashboard" #se der certo, redireciona para a pagina principal do sistema
     except Exception as e:
-        return "E-mail ou senha incorretos." #tratamento de erro, caso nao encontre o login
+        return "E-mail ou senha incorretos.", dash.no_update #tratamento de erro, caso nao encontre o login
 
 #callback responsável pelo login via google
 #quando o botao for clicado, o supabase ger uma URL de autenticacao e redireciona o usuario para ela
