@@ -17,6 +17,7 @@ COR_FUNDO_DIREITA = "#E4E4E4"
 
 layout = dbc.Container(
     [dcc.Location(id="redirecionar", refresh=True),
+    dcc.Location(id="redirecionar-email", refresh=True),
         dbc.Row(
             [
                 # lado esquerdo apresentacao (ocupa 6 de 12 colunas)
@@ -157,6 +158,7 @@ layout = dbc.Container(
 #callback do login, sempre que o usuario clicar no botao de acesso, o dash captura esses valores e executa a função
 @callback(
     Output("msg-erro", "children"),
+    Output("redirecionar-email", "pathname"),
     Input("btn-entrar", "n_clicks"),
     Input("input-email", "value"),
     Input("input-senha", "value"),
@@ -164,10 +166,10 @@ layout = dbc.Container(
 )
 def login_email(n_clicks, email, senha):
     if not n_clicks:
-        return ""
+        return "",dash.no_update
     try: #tenta enviar as credenciais pro supabase autenticar
         supabase.auth.sign_in_with_password({"email": email, "password": senha})
-        return ""
+        return "/dashboard" #se der certo, redireciona para a pagina principal do sistema
     except Exception as e:
         return "E-mail ou senha incorretos." #tratamento de erro, caso nao encontre o login
 
