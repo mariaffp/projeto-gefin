@@ -1,0 +1,161 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Página-1" id="2U9dr_J5LNWl1eRRjA9P">
+    <mxGraphModel dx="1433" dy="1911" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="heOAXXaJRN74sReP4n3Z-5" parent="1" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.start_1;whiteSpace=wrap;" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;Inicio: Usuario acessa o sistema&lt;/font&gt;" vertex="1">
+          <mxGeometry height="80" width="130" x="20" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="heOAXXaJRN74sReP4n3Z-6" parent="1" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.start_1;whiteSpace=wrap;" value="&lt;font style=&quot;font-size: 15px;&quot;&gt;FIM&lt;/font&gt;" vertex="1">
+          <mxGeometry height="60" width="100" x="2300" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="heOAXXaJRN74sReP4n3Z-9" parent="1" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.decision;whiteSpace=wrap;" value="&lt;font style=&quot;font-size: 15px;&quot;&gt;Como deseja fazer o login&lt;/font&gt;" vertex="1">
+          <mxGeometry height="120" width="170" x="630" as="geometry" />
+        </mxCell>
+        <mxCell id="heOAXXaJRN74sReP4n3Z-10" parent="1" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;" value="&lt;font style=&quot;font-size: 15px;&quot;&gt;Tela de login é exibida&lt;/font&gt;" vertex="1">
+          <mxGeometry height="100" width="186" x="314" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="heOAXXaJRN74sReP4n3Z-12" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;strokeWidth=5;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="170" y="70" as="sourcePoint" />
+            <mxPoint x="290" y="70" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="heOAXXaJRN74sReP4n3Z-14" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;strokeWidth=5;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="510" y="69.44" as="sourcePoint" />
+            <mxPoint x="630" y="69.44" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="heOAXXaJRN74sReP4n3Z-15" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;strokeWidth=5;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="719.41" y="171.18" />
+            </Array>
+            <mxPoint x="719.41" y="140" as="sourcePoint" />
+            <mxPoint x="950" y="170" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="heOAXXaJRN74sReP4n3Z-16" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;strokeWidth=5;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="807" y="65.59" />
+            </Array>
+            <mxPoint x="800" y="64.41" as="sourcePoint" />
+            <mxPoint x="962.3529411764705" y="64.41" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="heOAXXaJRN74sReP4n3Z-17" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;font style=&quot;font-size: 15px;&quot;&gt;Seleciona autenticação com o google&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="60" x="750" y="205" as="geometry" />
+        </mxCell>
+        <mxCell id="heOAXXaJRN74sReP4n3Z-18" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;font style=&quot;font-size: 15px;&quot;&gt;Seleciona Email e senha&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="60" x="827" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="heOAXXaJRN74sReP4n3Z-19" parent="1" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;" value="&lt;font style=&quot;font-size: 16px;&quot;&gt;Seleciona conta Google&lt;/font&gt;" vertex="1">
+          <mxGeometry height="100" width="186" x="980" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="heOAXXaJRN74sReP4n3Z-22" parent="1" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;" value="&lt;font style=&quot;font-size: 16px;&quot;&gt;Preenche Email e senha&lt;/font&gt;" vertex="1">
+          <mxGeometry height="100" width="186" x="980" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="heOAXXaJRN74sReP4n3Z-23" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;strokeWidth=5;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="1207" y="60.59" />
+            </Array>
+            <mxPoint x="1200" y="59.41" as="sourcePoint" />
+            <mxPoint x="1350" y="110" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="heOAXXaJRN74sReP4n3Z-24" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;strokeWidth=5;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="1197" y="180.59" />
+            </Array>
+            <mxPoint x="1190" y="179.41" as="sourcePoint" />
+            <mxPoint x="1350" y="140" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="heOAXXaJRN74sReP4n3Z-25" parent="1" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.decision;whiteSpace=wrap;" value="&lt;font style=&quot;font-size: 15px;&quot;&gt;Login é válido?&lt;/font&gt;" vertex="1">
+          <mxGeometry height="100" width="100" x="1370" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="heOAXXaJRN74sReP4n3Z-26" edge="1" parent="1" source="heOAXXaJRN74sReP4n3Z-25" style="endArrow=classic;html=1;rounded=0;strokeWidth=5;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="1420" y="320" />
+              <mxPoint x="350" y="321" />
+            </Array>
+            <mxPoint x="1430" y="180" as="sourcePoint" />
+            <mxPoint x="350" y="130" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="heOAXXaJRN74sReP4n3Z-27" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;strokeWidth=5;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="1487" y="120" />
+            </Array>
+            <mxPoint x="1480" y="118.82" as="sourcePoint" />
+            <mxPoint x="1642.3529411764705" y="118.82" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="heOAXXaJRN74sReP4n3Z-28" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=16;" value="SIM" vertex="1">
+          <mxGeometry height="30" width="60" x="1510" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="heOAXXaJRN74sReP4n3Z-29" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;strokeWidth=4;fontSize=18;" value="NÃO" vertex="1">
+          <mxGeometry height="30" width="60" x="780" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="heOAXXaJRN74sReP4n3Z-31" parent="1" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.decision;whiteSpace=wrap;" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;Qual o perfil do usuario?&lt;/font&gt;" vertex="1">
+          <mxGeometry height="110" width="130" x="1640" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="heOAXXaJRN74sReP4n3Z-32" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;strokeWidth=5;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="1700" y="221.18" />
+            </Array>
+            <mxPoint x="1700" y="190" as="sourcePoint" />
+            <mxPoint x="1930.5900000000001" y="220" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="heOAXXaJRN74sReP4n3Z-33" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;strokeWidth=5;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="1777" y="120" />
+            </Array>
+            <mxPoint x="1770" y="118.82" as="sourcePoint" />
+            <mxPoint x="1932.3529411764705" y="118.82" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="heOAXXaJRN74sReP4n3Z-34" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;font style=&quot;font-size: 15px;&quot;&gt;Membro normal&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="60" x="1790" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="heOAXXaJRN74sReP4n3Z-35" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;font style=&quot;font-size: 16px;&quot;&gt;Membro financeiro&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="60" x="1780" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="heOAXXaJRN74sReP4n3Z-36" parent="1" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;" value="&lt;font style=&quot;font-size: 15px;&quot;&gt;Acessa dashboard somente em modo de visualização&lt;/font&gt;" vertex="1">
+          <mxGeometry height="100" width="186" x="1950" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="heOAXXaJRN74sReP4n3Z-37" parent="1" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;" value="&lt;font style=&quot;font-size: 15px;&quot;&gt;Acessa dashboard com funcionalidades completas&lt;/font&gt;" vertex="1">
+          <mxGeometry height="100" width="186" x="1950" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="heOAXXaJRN74sReP4n3Z-39" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;strokeWidth=5;entryX=0;entryY=0.333;entryDx=0;entryDy=0;entryPerimeter=0;" target="heOAXXaJRN74sReP4n3Z-6" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="2147" y="120" />
+            </Array>
+            <mxPoint x="2140" y="118.82" as="sourcePoint" />
+            <mxPoint x="2302.3529411764703" y="118.82" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="heOAXXaJRN74sReP4n3Z-40" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;strokeWidth=5;entryX=0.007;entryY=0.717;entryDx=0;entryDy=0;entryPerimeter=0;" target="heOAXXaJRN74sReP4n3Z-6" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="2147" y="236.18" />
+            </Array>
+            <mxPoint x="2140" y="235" as="sourcePoint" />
+            <mxPoint x="2300" y="266.18" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
