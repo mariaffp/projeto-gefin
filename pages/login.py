@@ -2,6 +2,8 @@ import dash
 from dash import html, Input, Output, callback, dcc
 import dash_bootstrap_components as dbc
 from supabase_client import supabase
+from usuario import buscar_perfil, eh_financeiro
+
 
 #https://www.dash-bootstrap-components.com/docs/themes/explorer/
 #abram esse link ^, vai ter cada elemento pra vcs explorarem, e cliquem no livro azul, eles te mandam direto para o docs daquele elemento em especifico
@@ -168,10 +170,16 @@ def login_email(n_clicks, email, senha):
     if not n_clicks:
         return "",dash.no_update
     try: #tenta enviar as credenciais pro supabase autenticar
-        supabase.auth.sign_in_with_password({"email": email, "password": senha})
-        return "/dashboard" #se der certo, redireciona para a pagina principal do sistema
+        resposta = supabase.auth.sign_in_with_password({"email": email, "password": senha})
+
+        user_id = resposta.user.id
+        perfil = buscar_perfil(user_id)
+        if eh_financeiro(perfil): #verificando se perfil é de membro do financeiro
+            return "/teste" #se for, vai para essa pagina especial
+    
+        return "", "/dashboard" #se não é membro do financerio vai para essa pagina
     except Exception as e:
-        return "E-mail ou senha incorretos." #tratamento de erro, caso nao encontre o login
+        return "E-mail ou senha incorretos.", dash.no_update #tratamento de erro, caso nao encontre o login
 
 #callback responsável pelo login via google
 #quando o botao for clicado, o supabase ger uma URL de autenticacao e redireciona o usuario para ela
@@ -183,17 +191,16 @@ def login_email(n_clicks, email, senha):
 )
 def login_google(n_clicks):
     if not n_clicks:
-        #return False
         return dash.no_update
-    #response = supabase.auth.sign_in_with_oauth(
-        #{"provider": "google"},
-        #options={"redirect_to": "http://localhost:8050"})
-    #print("URL Google:", response.url)
+    
+    
     try: #solicita ao supabase o inicio do fluxo oauth com o google
         response = supabase.auth.sign_in_with_oauth(
             {"provider": "google",
-            "options":{"redirect_to": "http://localhost:8050"}}
+            "options":{"redirect_to": "http://127.0.0.1:8050"}}
         )
+
+        print(response)
         return response.url #redireciona o navegador para a pag de autenticação
     except Exception as e:
         print("ERRO GOOGLE:", e)
@@ -207,6 +214,26 @@ def login_google(n_clicks):
     prevent_initial_call=True
 )
 def redirecionar_apos_google(search):
-    if search and "code=" in search: #verifica se o login foi concluido
-        return "/dashboard" #redireciona para a pagina principal do sistema
-    return dash.no_update #se nao tem codigo valido, nao faz nada
+    print("SEARCH:", search)
+    print("URL RECEBIDA:", search)
+    print("SESSION ANTES:", supabase.auth.get_session())
+
+    if not search or "code=" not in search:
+        return dash.no_update
+    try:
+        session = supabase.auth.get_session()
+        print(session)
+        if not session:
+            return "/"
+
+        user_id = session.user.id
+        perfil = buscar_perfil(user_id)
+
+        if eh_financeiro(perfil):
+            return "/teste"
+
+        return "/dashboard"
+
+    except Exception as e:
+        print("Erro:", e)
+        return "/"
