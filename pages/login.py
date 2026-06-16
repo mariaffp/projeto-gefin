@@ -2,6 +2,7 @@ import dash
 from dash import html, Input, Output, callback, dcc
 import dash_bootstrap_components as dbc
 from supabase_client import supabase
+from usuario import buscar_perfil, eh_financeiro
 
 #https://www.dash-bootstrap-components.com/docs/themes/explorer/
 #abram esse link ^, vai ter cada elemento pra vcs explorarem, e cliquem no livro azul, eles te mandam direto para o docs daquele elemento em especifico
@@ -17,6 +18,7 @@ COR_FUNDO_DIREITA = "#E4E4E4"
 
 layout = dbc.Container(
     [dcc.Location(id="redirecionar", refresh=True),
+    dcc.Location(id="redirecionar-email", refresh=True),
         dbc.Row(
             [
                 # lado esquerdo apresentacao (ocupa 6 de 12 colunas)
@@ -102,42 +104,31 @@ layout = dbc.Container(
 
                                     dbc.Button(
                                         [
-                                            html.Div(
-                                                html.Img(
-                                                    src="/assets/google.png",
-                                                    style={
-                                                        "display": "flex",
-                                                        "alignItems": "center",
-                                                        "marginRight": "10px",
-                                                        "width": "30px"
-                                                        }
-                                                ),
-                                                style={
-                                                    "padding": "1px",
-                                                    "borderRadius": "2px",
-                                                    "marginRight": "30px",
-                                                    "display": "inline-block",
-                                                    "position": "absolute",
-                                                    "top": "500px",
-                                                    "right": "520px"
-                                                }
-                                            ),
-                                            html.Span("Acessar utilizando Google")
-                                        ],
-                                        id="btn-google",
-                                        className="w-100",
-                                        style={
-                                            "backgroundColor": COR_BOTAO,
-                                            "borderColor": COR_BOTAO,
-                                            "color": COR_TEXTO_BRANCO,
-                                            "fontSize": "1.1rem",
-                                            "alignItems": "center",
-                                            "justifyContent": "center",
-                                            "gap": "15px"
-                                        }
-                                    )
-                                ])
-                            ],
+                            
+                                            html.Img(
+                                            src="/assets/google.png",
+                                            style={
+                                                "width": "24px",
+                                                "marginRight": "10px",
+                                                "verticalAlign": "middle"
+                                            }
+                                        ),
+                                        html.Span("Acessar utilizando Google")
+                                    ],
+                                    id="btn-google",
+                                    className="w-100",
+                                    style={
+                                        "backgroundColor": COR_BOTAO,
+                                        "borderColor": COR_BOTAO,
+                                        "color": COR_TEXTO_BRANCO,
+                                        "fontSize": "1.1rem",
+                                        "display": "flex",
+                                        "alignItems": "center",
+                                        "justifyContent": "center",
+                                    }
+                                )
+                            ])
+                        ],
                             style={"width": "100%", "maxWidth": "450px"}
                         )
                     ],
@@ -157,6 +148,7 @@ layout = dbc.Container(
 #callback do login, sempre que o usuario clicar no botao de acesso, o dash captura esses valores e executa a função
 @callback(
     Output("msg-erro", "children"),
+    Output("redirecionar-email", "pathname"),
     Input("btn-entrar", "n_clicks"),
     Input("input-email", "value"),
     Input("input-senha", "value"),
@@ -164,29 +156,33 @@ layout = dbc.Container(
 )
 def login_email(n_clicks, email, senha):
     if not n_clicks:
-        return ""
+        return "",dash.no_update
     try: #tenta enviar as credenciais pro supabase autenticar
-        supabase.auth.sign_in_with_password({"email": email, "password": senha})
-        return ""
+        resposta = supabase.auth.sign_in_with_password({"email": email, "password": senha})
+       
+        #buscando perfil do usuario
+        user_id = resposta.user.id
+        perfil = buscar_perfil(user_id)
+
+        #verificando perfil
+        if eh_financeiro(perfil):
+            return "","/teste"
+        
+        return "","/dashboard" #se der certo, redireciona para a pagina principal do sistema
     except Exception as e:
-        return "E-mail ou senha incorretos." #tratamento de erro, caso nao encontre o login
+        return "E-mail ou senha incorretos.", dash.no_update #tratamento de erro, caso nao encontre o login
 
 #callback responsável pelo login via google
 #quando o botao for clicado, o supabase ger uma URL de autenticacao e redireciona o usuario para ela
 @callback(
-    #Output("btn-google", "disabled"),
     Output("redirecionar", "href"),
     Input("btn-google", "n_clicks"),
     prevent_initial_call=True
 )
 def login_google(n_clicks):
     if not n_clicks:
-        #return False
         return dash.no_update
-    #response = supabase.auth.sign_in_with_oauth(
-        #{"provider": "google"},
-        #options={"redirect_to": "http://localhost:8050"})
-    #print("URL Google:", response.url)
+
     try: #solicita ao supabase o inicio do fluxo oauth com o google
         response = supabase.auth.sign_in_with_oauth(
             {"provider": "google",
@@ -196,7 +192,6 @@ def login_google(n_clicks):
     except Exception as e:
         print("ERRO GOOGLE:", e)
         return dash.no_update
-    #return response.url
 
 #Após autenticacao com o google,o usuario retorna para a aplicação, mas esse callback verifica se o codigo de auth foi recebido
 @callback(
@@ -205,6 +200,23 @@ def login_google(n_clicks):
     prevent_initial_call=True
 )
 def redirecionar_apos_google(search):
-    if search and "code=" in search: #verifica se o login foi concluido
-        return "/dashboard" #redireciona para a pagina principal do sistema
-    return dash.no_update #se nao tem codigo valido, nao faz nada
+    if search and "code=" in search:
+        try:
+            # Extrai o code da URL
+            code = search.split("code=")[1].split("&")[0]
+            
+            # Troca o code pela sessão
+            resposta = supabase.auth.exchange_code_for_session({"auth_code": code})
+            
+            # Busca o perfil e redireciona
+            user_id = resposta.user.id
+            perfil = buscar_perfil(user_id)
+
+            if eh_financeiro(perfil):
+                return "/teste"
+            return "/dashboard"
+
+        except Exception as e:
+            print("ERRO ao trocar code:", e)
+            return "/"
+    return dash.no_update
