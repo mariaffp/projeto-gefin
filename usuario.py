@@ -1,4 +1,4 @@
-from supabase_client import supabase
+from supabase_client import supabase, supabase_admin
 
 
 def buscar_perfil(user_id):
@@ -25,7 +25,7 @@ def eh_financeiro(perfil):
 def cadastrar_usuario(email, senha, nome, perfil):
     try:
         # Cria o usuário no auth.users com o nome nos metadados
-        resposta = supabase.auth.admin.create_user({
+        resposta = supabase_admin.auth.admin.create_user({
             "email": email,
             "password": senha,
             "user_metadata": {
