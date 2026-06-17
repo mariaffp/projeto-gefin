@@ -18,6 +18,8 @@ COR_FUNDO_DIREITA = "#E4E4E4"
 layout = html.Div(
     [
         dcc.Location(id="redirecionar", refresh=True),
+        dcc.Location(id="url", refresh=False),
+        html.Div(id="auth-check", style={"display": "none"}),
         dcc.Store(id="hcaptcha-token-store"),
 
         # fundo com o blur
@@ -144,7 +146,7 @@ layout = html.Div(
 #callback do login, sempre que o usuario clicar no botao de acesso, o dash captura esses valores e executa a função
 @callback(
     Output("msg-erro", "children"),
-    Output("redirecionar-email", "pathname"),
+    Output("redirecionar", "pathname", allow_duplicate=True),
     Input("btn-entrar", "n_clicks"),
     Input("input-email", "value"),
     Input("input-senha", "value"),
