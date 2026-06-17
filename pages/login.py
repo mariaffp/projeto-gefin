@@ -120,7 +120,7 @@ layout = html.Div(
                     }
                 ),
 
-                # logo animada svg
+                # logo animada svg,
                 html.ObjectEl(
                     data="/assets/focus_animatedlogo.svg",
                     type="image/svg+xml",
