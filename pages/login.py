@@ -2,6 +2,7 @@ import dash
 from dash import html, Input, Output, callback, dcc
 import dash_bootstrap_components as dbc
 from supabase_client import supabase
+from urllib.parse import parse_qs
 
 #https://www.dash-bootstrap-components.com/docs/themes/explorer/
 #abram esse link ^, vai ter cada elemento pra vcs explorarem, e cliquem no livro azul, eles te mandam direto para o docs daquele elemento em especifico
@@ -190,11 +191,19 @@ def login_google(n_clicks):
 
 #Após autenticacao com o google,o usuario retorna para a aplicação, mas esse callback verifica se o codigo de auth foi recebido
 @callback(
-    Output("redirecionar", "pathname"),
+    Output("redirecionar", "pathname", allow_duplicate=True),
     Input("redirecionar", "search"),
     prevent_initial_call=True
 )
 def redirecionar_apos_google(search):
     if search and "code=" in search: #verifica se o login foi concluido
-        return "/dashboard" #redireciona para a pagina principal do sistema
+        query_params = parse_qs(search.lstrip('?'))
+        code = query_params.get('code', [None])[0]
+        if code:
+            try:
+                supabase.auth.exchange_code_for_session({"auth_code": code})
+                return "/dashboard"
+            except Exception as e:
+                print("erro autenticacao:", e)
+                return dash.no_update
     return dash.no_update #se nao tem codigo valido, nao faz nada
