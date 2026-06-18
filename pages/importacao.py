@@ -6,8 +6,6 @@ import dash_bootstrap_components as dbc
 dash.register_page(__name__, path='/importacao', name='Importação')
 
 layout = dbc.Container([
-    render_navbar(),
-
     html.H2("Importação de Extratos", className="mt-4 mb-4"),
 
     # importar arquivos
