@@ -6,8 +6,6 @@ from components.navbar import render_navbar
 dash.register_page(__name__, path='/transacoes', name='Transações')
 
 layout = html.Div([
-    render_navbar(), #nnavbar
-
     dbc.Container([
         html.H2("Gerenciamento de Transações", className="mb-4"),
 
