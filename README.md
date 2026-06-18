@@ -16,5 +16,10 @@ A plataforma permite a importação dos extratos bancários em CSV e PDF, catego
  - Pandas
 
  Equipe:
+ Victor Iorio (https://github.com/vicode360)
+ Maria Fernanda (https://github.com/mariaffp)
+ Samuel de Moraes (https://github.com/MiIsaarks)
+ João Rocha (https://github.com/Jovigabriel)
+ Leonardo Valladão (https://github.com/Leo-dk574)
  
 
