@@ -1,7 +1,6 @@
 import dash
 from dash import html, dcc
 import dash_bootstrap_components as dbc
-from components.navbar import render_navbar
 
 dash.register_page(__name__, path='/transacoes', name='Transações')
 
@@ -9,7 +8,7 @@ layout = html.Div([
     dbc.Container([
         html.H2("Gerenciamento de Transações", className="mb-4"),
 
-        # 1. Seção de Filtros
+        #filtros.
         dbc.Card([
             dbc.CardBody([
                 html.H5("Filtros de Busca", className="card-title mb-3"),
@@ -48,7 +47,7 @@ layout = html.Div([
         dbc.Row([
             dbc.Col([
                 dbc.Button("Nova Transação", color="success", className="me-2 shadow-sm fw-bold"),
-                dbc.Button("✏Editar", color="warning", className="me-2 text-white shadow-sm fw-bold"),
+                dbc.Button("Editar", color="warning", className="me-2 text-white shadow-sm fw-bold"),
                 dbc.Button("Excluir", color="danger", className="shadow-sm fw-bold"),
             ], width=12, className="mb-3 d-flex justify-content-start")
         ]),
@@ -59,7 +58,7 @@ layout = html.Div([
             dbc.Table([
                 html.Thead(
                     html.Tr([
-                        html.Th("", style={"width": "40px"}),  # Coluna para o checkbox de seleção
+                        html.Th("", style={"width": "40px"}),
                         html.Th("Data"),
                         html.Th("Descrição"),
                         html.Th("Categoria"),

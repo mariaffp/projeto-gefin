@@ -16,5 +16,14 @@ layout = dbc.Container([
             color="primary",
             className="mt-4"
         )
+    ], className="text-center"),
+    html.Div([
+        dbc.Button(
+            "Transações",
+            href="/transacoes",
+            color="primary",
+            className="mt-4"
+        )
     ], className="text-center")
+
 ])
