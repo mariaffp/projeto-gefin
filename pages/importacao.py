@@ -1,5 +1,4 @@
 import dash
-from components.navbar import render_navbar
 from dash import html, dcc
 import dash_bootstrap_components as dbc
 
