@@ -1,7 +1,6 @@
 import dash
 from dash import html, dcc
 import dash_bootstrap_components as dbc
-from components.navbar import render_navbar
 
 dash.register_page(__name__, path='/transacoes', name='Transações')
 
