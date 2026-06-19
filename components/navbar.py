@@ -19,7 +19,10 @@ def create_navbar(perfil="NORMAL"):
                         dbc.Col(dbc.NavLink("Transações", href="/transacoes", className="text-white pe-3")),
                         dbc.Col(dbc.NavLink("Relatórios", href="/relatorios", className="text-white pe-3")),
                         dbc.Col(dbc.NavLink("Importação", href="/importacao", className="text-white")),
-                    ] if perfil in ["FINANCEIRO", "ADMIN"] else []),
+                    ] if perfil in ["FINANCEIRO", "ADMIN"] else []) +
+                    ([
+                        dbc.Col(dbc.NavLink("Admin", href="/admin", className="text-white pe-3")),
+                    ] if perfil == "ADMIN" else []),
                     align="center",
                     className="g-0"
                 ),
