@@ -2,7 +2,7 @@ import dash
 from dash import html, Input, Output, callback, dcc
 import dash_bootstrap_components as dbc
 from supabase_client import supabase
-from usuario import buscar_perfil, eh_financeiro
+from services.usuario import buscar_perfil, eh_financeiro
 from urllib.parse import parse_qs
 
 #https://www.dash-bootstrap-components.com/docs/themes/explorer/
