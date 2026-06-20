@@ -35,7 +35,7 @@ layout = html.Div(
                 "background": "linear-gradient(to bottom right, rgba(109, 237, 255, 0.6), rgba(171, 195, 255, 0.6)), url('/assets/focusbackground.png')",
                 "backgroundSize": "cover",
                 "backgroundPosition": "center",
-                "filter": "blur(15px)",
+                "filter": "blur(5px)",
                 "transform": "scale(1.1)",
                 "zIndex": -1,
             }
@@ -64,7 +64,8 @@ layout = html.Div(
                                 className="mb-4 py-2",
                                 style={"borderRadius": "4px"}
                             ),
-                        ]),
+                        ]
+                        ),
                         html.Div(id="msg-erro", className="text-danger mb-2"),
                         html.Div([
                             dbc.Button(
@@ -112,6 +113,8 @@ layout = html.Div(
                             )
                         ])
                     ],
+
+                    className="glass-box p-5",
                     style={
                         "backgroundColor": COR_FUNDO_DIREITA,
                         "padding": "40px",
@@ -126,7 +129,7 @@ layout = html.Div(
 
                 # logo animada svg,
                 html.ObjectEl(
-                    data="/assets/focus_animatedlogo.svg",
+                    data="/assets/focus_animatedlogo_clean.svg",
                     type="image/svg+xml",
                     style={
                         "width": "450px",

@@ -1,0 +1,16 @@
+body {
+    background: linear-gradient(135deg, #f2f0ef 50%, #43CBF0 130%);
+    min-height: 100vh;
+    background-attachment: fixed;
+    margin: 0;
+
+    .glass-box {
+    background: rgba(255, 255, 255, 0.25) !important; /*ajuste o 0.25 ali se quiser mais ou menos transparente*/
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+    border-radius: 16px;
+        /* https://css.glass/ */
+}
+}
