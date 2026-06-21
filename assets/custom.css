@@ -5,7 +5,7 @@ body {
     margin: 0;
 
     .glass-box {
-    background: rgba(255, 255, 255, 0.25) !important; /*ajuste o 0.25 ali se quiser mais ou menos transparente*/
+    background: rgba(255, 255, 255, 0.15) !important; /*ajuste o 0.25 ali se quiser mais ou menos transparente*/
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
     border: 1px solid rgba(255, 255, 255, 0.4) !important;

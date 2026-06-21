@@ -48,7 +48,7 @@ layout = html.Div(
                 html.Div(
                     [
                         html.Div([
-                            dbc.Label("E-mail", style={"fontWeight": "bold", "fontSize": "1.2rem"}),
+                            dbc.Label("E-mail", style={"fontWeight": "bold", "fontSize": "1.2rem", "color": "#000000"}),
                             dbc.Input(
                                 id="input-email",
                                 type="email",
@@ -56,7 +56,7 @@ layout = html.Div(
                                 className="mb-4 py-2",
                                 style={"borderRadius": "4px"}
                             ),
-                            dbc.Label("Senha", style={"fontWeight": "bold", "fontSize": "1.2rem"}),
+                            dbc.Label("Senha", style={"fontWeight": "bold", "fontSize": "1.2rem", "color": "#000000"}),
                             dbc.Input(
                                 id="input-senha",
                                 type="password",
