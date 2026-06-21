@@ -127,13 +127,13 @@ layout = html.Div(
                     }
                 ),
 
-                # logo animada svg,
+                # logo svg,
                 html.ObjectEl(
-                    data="/assets/focus_animatedlogo_clean.svg",
+                    data="/assets/Focus_consultoria.svg",
                     type="image/svg+xml",
                     style={
-                        "width": "450px",
-                        "height": "450px",
+                        "width": "400px",
+                        "height": "400px",
                         "marginRight": "8vw",
                         "pointerEvents": "none",
                         "zIndex": 0
