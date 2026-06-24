@@ -20,7 +20,7 @@ def create_kpi_card(title, value, text_class="text-white"):
         dbc.CardBody(
             [
                 # Titulo do card
-                html.H6(title, className="card-title text-muted fw-bold mb-2", style={"fontSize": "0.9rem"}),
+                html.H6(title, className="card-title text-white fw-bold mb-2", style={"fontSize": "0.9rem"}),
                
                 html.H4(value, className=f"{text_class} fw-bold m-0")
             ]

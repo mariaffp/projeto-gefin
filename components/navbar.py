@@ -5,67 +5,68 @@ from dash import html, Input, Output, State, callback, dcc
 
 #def create_navbar():
 def create_navbar(perfil="NORMAL"):
-   
-    nav_content = dbc.Row(
-        [
-            # Logo e Links
-            dbc.Col(
-                dbc.Row(
-                    [
-                        dbc.Col(html.Img(src="/assets/gefin1.png", height="30px"), width="auto", className="pe-3"),
-                        dbc.Col(dbc.NavLink("Página Inicial", href="/dashboard", className="text-white pe-3")),
-                    ] +
-                    ([
-                        dbc.Col(dbc.NavLink("Transações", href="/transacoes", className="text-white pe-3")),
-                        dbc.Col(dbc.NavLink("Relatórios", href="/relatorios", className="text-white pe-3")),
-                        dbc.Col(dbc.NavLink("Importação", href="/importacao", className="text-white")),
-                    ] if perfil in ["FINANCEIRO", "ADMIN"] else []) +
-                    ([
-                        dbc.Col(dbc.NavLink("Admin", href="/admin", className="text-white pe-3")),
-                    ] if perfil == "ADMIN" else []),
-                    align="center",
-                    className="g-0"
-                ),
-                className="flex-grow-1"
-            ),
-            
-            # Bem vindo
-            dbc.Col(
-                html.Div(
-                    [
-                        html.Span("Bem vindo, Nome", className="text-white me-2"),
-                        dbc.Button("Sair", id="btn-logout", color="light", size="sm", outline=True),
-                        dcc.Location(id="logout-redirect", refresh=True)
-                    ]
-                ),
-                width="auto",
-                className="mt-2 mt-md-0"
-            ),
-        ],
-        className="g-0 w-100 align-items-center",
-    )
+    # Navigation Links (inside dbc.Nav)
+    nav_links = [
+        dbc.NavItem(dbc.NavLink("Página Inicial", href="/dashboard", active="exact", className="glass-nav-link px-3")),
+    ]
+    if perfil in ["FINANCEIRO", "ADMIN"]:
+        nav_links.extend([
+            dbc.NavItem(dbc.NavLink("Transações", href="/transacoes", active="exact", className="glass-nav-link px-3")),
+            dbc.NavItem(dbc.NavLink("Relatórios", href="/relatorios", active="exact", className="glass-nav-link px-3")),
+            dbc.NavItem(dbc.NavLink("Importação", href="/importacao", active="exact", className="glass-nav-link px-3")),
+        ])
+    if perfil == "ADMIN":
+        nav_links.append(
+            dbc.NavItem(dbc.NavLink("Admin", href="/admin", active="exact", className="glass-nav-link px-3"))
+        )
 
-    
     navbar = dbc.Navbar(
         dbc.Container(
             [
-                # Funcionabilidade pro mobile
-                dbc.NavbarToggler(id="navbar-toggler", n_clicks=0, className="ms-auto me-2"),
+                # logo
+                html.A(
+                    html.Img(src="/assets/Focus_consultoria.svg", height="45px"),
+                    href="/dashboard",
+                    className="navbar-brand me-4"   
+                ),
                 
-                # Colapso
+                # navbar mobile
+                dbc.NavbarToggler(id="navbar-toggler", n_clicks=0),
+                
+                # menu colapsavel
                 dbc.Collapse(
-                    nav_content,
+                    [
+                        dbc.Nav(
+                            nav_links,
+                            className="me-auto align-items-center",
+                            navbar=True,
+                        ),
+                        # perfil e botao de sair
+                        html.Div(
+                            [
+                                html.Span("Nome", className="glass-nav-text mx-3"),
+                                dbc.Button("Sair", id="btn-logout", color="primary", size="sm", outline=True, className="glass-btn"),
+                                dcc.Location(id="logout-redirect", refresh=True)
+                            ],
+                            className="d-flex align-items-center mt-2 mt-lg-0"
+                        ),
+                    ],
                     id="navbar-collapse",
                     is_open=False,
                     navbar=True,
-                    className="w-100"
                 ),
             ],
             fluid=True,
         ),
-        color="#1d6fcc",  
-        dark=True,
-        className="py-2",
+        color="transparent",  
+        dark=False,
+        className="glass-navbar mx-auto mt-3",
+        style={
+            "width": "90%",
+            "maxWidth": "1200px",
+            "borderRadius": "16px",
+            "padding": "10px 20px"
+        }
     )
     
     return navbar

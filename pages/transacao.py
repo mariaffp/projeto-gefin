@@ -4,9 +4,14 @@ import dash_bootstrap_components as dbc
 
 dash.register_page(__name__, path='/transacoes', name='Transações')
 
-layout = html.Div([
-    dbc.Container([
-        html.H2("Gerenciamento de Transações", className="mb-4"),
+layout = dbc.Container([
+    dbc.Row(
+        dbc.Col(
+            html.H2("Gerenciamento de Transações", className="fw-normal text-dark"),
+            width="auto"
+        ),
+        className="my-4 align-items-center"
+    ),
 
         #filtros.
         dbc.Card([
@@ -98,5 +103,4 @@ layout = html.Div([
             ], striped=True, hover=True, responsive=True, className="mb-0")
         ], className="shadow-sm")
 
-    ], fluid=True, className="px-4")
-])
+], fluid=True, className="py-2")

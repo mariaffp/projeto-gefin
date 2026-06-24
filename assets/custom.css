@@ -1,16 +1,61 @@
 body {
-    background: linear-gradient(135deg, #f2f0ef 50%, #43CBF0 130%);
+    background: linear-gradient(135deg, #f2f0ef 20%, #43CBF0 100%);
+    background-repeat: no-repeat;
+    background-size: cover;
     min-height: 100vh;
     background-attachment: fixed;
     margin: 0;
+    padding: 0;
+    /* Removed padding-top since navbar is no longer fixed to the screen */
+}
 
-    .glass-box {
-    background: rgba(255, 255, 255, 0.15) !important; /*ajuste o 0.25 ali se quiser mais ou menos transparente*/
+.glass-box {
+    background: rgba(255, 255, 255, 0.15) !important;
+    /*ajuste o 0.25 ali se quiser mais ou menos transparente*/
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
     border: 1px solid rgba(255, 255, 255, 0.4) !important;
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
     border-radius: 16px;
-        /* https://css.glass/ */
+    /* https://css.glass/ */
 }
+
+/* Glassmorphism navbar*/
+.glass-navbar {
+    background: rgb(46, 126, 232) !important;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+    box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+/* paginas navbar */
+.glass-btn,
+.glass-nav-link {
+    color: #ffffff !important;
+    font-weight: 600;
+    text-decoration: none;
+
+    display: inline-block;
+    padding: 6px 16px !important;
+    margin: 0 4px;
+    border: 1px solid transparent !important;
+    border-radius: 8px;
+    background: transparent !important;
+    transition: all 0.3s ease;
+}
+
+.glass-btn:hover,
+.glass-nav-link:hover,
+.glass-nav-link.active {
+    background: rgba(12, 56, 102, 0.8) !important;
+    color: #ffffff !important;
+    border-color: rgba(12, 56, 102, 0.8) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.glass-nav-text {
+    color: #ffffff;
+    font-weight: 500;
 }
