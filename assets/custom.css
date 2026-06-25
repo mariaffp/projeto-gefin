@@ -59,3 +59,101 @@ body {
     color: #ffffff;
     font-weight: 500;
 }
+
+/* preview dos attachments */
+.attachment-card {
+    position: relative;
+    display: inline-block;
+    width: 220px;
+    height: 160px;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    overflow: hidden;
+    cursor: pointer;
+    background: #f8f9fa;
+    margin-top: 8px;
+}
+
+.attachment-thumbnail {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: filter 0.2s ease;
+}
+
+.attachment-card:hover .attachment-thumbnail {
+    filter: brightness(0.7);
+}
+
+.attachment-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.attachment-card:hover .attachment-overlay {
+    opacity: 1;
+}
+
+.attachment-file-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    background: #fff;
+    margin-top: 8px;
+    min-width: 220px;
+    max-width: 400px;
+    cursor: pointer;
+    transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.attachment-file-chip:hover {
+    background: #f0f4ff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.file-preview-card {
+    position: relative;
+    display: inline-block;
+    width: 80px;
+    height: 80px;
+}
+
+.btn-close-file {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    background: #dc3545;
+    color: #fff;
+    font-size: 0.55rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    z-index: 2;
+}
+
+.file-preview-card:hover .btn-close-file {
+    opacity: 1;
+}
