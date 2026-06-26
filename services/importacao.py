@@ -1,13 +1,13 @@
 import os
-from datetime import datetime, timezone
 import re
+from datetime import datetime, timezone
 import pandas as pd
-
 from supabase_client import supabase
 from services.usuario import buscar_perfil, eh_financeiro
 from services.conta import criar_conta
 from services.forma_pagamento import criar_forma_pagamento
 from services.transacao import verificar_duplicatas, salvar_transacoes_importadas
+from zoneinfo import ZoneInfo
 
 
 COLUNAS_CORA = {
@@ -43,6 +43,7 @@ def normalizar_texto(texto):
         return None
 
     return " ".join(texto.split())
+
 
 def normalizar_forma_pagamento(nome):
     nome = normalizar_texto(nome)
@@ -150,6 +151,7 @@ def definir_situacao(valor):
 
     return "Recebido"
 
+
 def normalizar_situacao(situacao, valor):
     situacao = normalizar_texto(situacao)
 
@@ -185,16 +187,17 @@ def normalizar_subcategoria(subcategoria):
 def buscar_categoria_ou_pendente(nome_categoria):
     nome_categoria = normalizar_texto(nome_categoria)
 
-    categoria = (
-        supabase.table("categoria")
-        .select("id_categoria")
-        .eq("nome", nome_categoria)
-        .is_("deletado", None)
-        .execute()
-    )
+    if nome_categoria:
+        categoria = (
+            supabase.table("categoria")
+            .select("id_categoria")
+            .eq("nome", nome_categoria)
+            .is_("deletado", None)
+            .execute()
+        )
 
-    if categoria.data:
-        return categoria.data[0]["id_categoria"]
+        if categoria.data:
+            return categoria.data[0]["id_categoria"]
 
     pendente = (
         supabase.table("categoria")
@@ -208,6 +211,7 @@ def buscar_categoria_ou_pendente(nome_categoria):
         raise Exception("Categoria Pendente não encontrada no banco")
 
     return pendente.data[0]["id_categoria"]
+
 
 def buscar_ou_criar_conta(nome, user_id):
     nome = normalizar_texto(nome)
@@ -226,7 +230,6 @@ def buscar_ou_criar_conta(nome, user_id):
         return conta.data[0]["id_conta"]
 
     nova_conta = criar_conta(nome, user_id)
-
     return nova_conta.data[0]["id_conta"]
 
 
@@ -247,29 +250,33 @@ def buscar_ou_criar_forma_pagamento(nome, user_id):
         return forma_pagamento.data[0]["id_forma_pagamento"]
 
     nova_forma_pagamento = criar_forma_pagamento(nome, user_id)
-
     return nova_forma_pagamento.data[0]["id_forma_pagamento"]
 
 
-def registrar_importacao(caminho_arquivo, origem, user_id):
+def registrar_importacao(caminho_arquivo, origem, user_id, nome_arquivo_original=None):
     perfil = buscar_perfil(user_id)
 
     if not eh_financeiro(perfil):
         raise Exception("Usuário sem permissão para registrar importação")
 
-    nome_arquivo = os.path.basename(caminho_arquivo)
+    nome_arquivo = (
+        nome_arquivo_original
+        if nome_arquivo_original
+        else os.path.basename(caminho_arquivo)
+    )
 
     resposta = (
-    supabase.table("importacao")
-    .insert({
-        "id_usuario": user_id,
-        "nome_arquivo": nome_arquivo,
-        "formato": "CSV",
-        "origem": origem,
-        "data_importacao": datetime.now(timezone.utc).isoformat()
-    })
-    .execute()
-)
+        supabase.table("importacao")
+        .insert({
+            "id_usuario": user_id,
+            "nome_arquivo": nome_arquivo,
+            "formato": "CSV",
+            "origem": origem,
+            "data_importacao": datetime.now(ZoneInfo("America/Sao_Paulo")
+            ).isoformat()
+        })
+        .execute()
+    )
 
     return resposta.data[0]["id_importacao"]
 
@@ -278,6 +285,7 @@ def mapear_cora(df, user_id):
     df = renomear_colunas_normalizadas(df)
 
     id_conta = buscar_ou_criar_conta("Cora", user_id)
+    id_categoria_pendente = buscar_categoria_ou_pendente(None)
 
     transacoes = []
 
@@ -296,7 +304,7 @@ def mapear_cora(df, user_id):
             "id_forma_pagamento": buscar_ou_criar_forma_pagamento(forma_pagamento, user_id),
             "situacao": definir_situacao(valor),
             "subcategoria": "PENDENTE",
-            "id_categoria": buscar_categoria_ou_pendente(None),
+            "id_categoria": id_categoria_pendente,
             "id_usuario": user_id,
             "id_importacao": None,
             "numero_parcela": numero_parcela,
@@ -316,20 +324,14 @@ def mapear_mobills(df, user_id):
     for _, row in df.iterrows():
         valor = converter_valor(row["VALOR"])
 
-        situacao = normalizar_situacao(row["SITUAÇÃO"], valor)
-        if not situacao:
-            situacao = definir_situacao(valor)
-
-        subcategoria = normalizar_subcategoria(row["SUBCATEGORIA"])
-
         transacoes.append({
             "data": converter_data(row["DATA"]),
             "descricao": normalizar_texto(row["DESCRIÇÃO"]),
             "valor": valor,
             "id_conta": buscar_ou_criar_conta(row["CONTA"], user_id),
             "id_forma_pagamento": None,
-            "situacao": situacao,
-            "subcategoria": subcategoria,
+            "situacao": normalizar_situacao(row["SITUAÇÃO"], valor),
+            "subcategoria": normalizar_subcategoria(row["SUBCATEGORIA"]),
             "id_categoria": buscar_categoria_ou_pendente(row["CATEGORIA"]),
             "id_usuario": user_id,
             "id_importacao": None,
@@ -375,7 +377,7 @@ def buscar_importacao(id_importacao, user_id):
     return importacao.data[0]
 
 
-def ler_csv(caminho_arquivo, user_id, confirmar_duplicatas=False):
+def ler_csv(caminho_arquivo, user_id, confirmar_duplicatas=False, nome_arquivo_original=None):
     perfil = buscar_perfil(user_id)
 
     if not eh_financeiro(perfil):
@@ -403,7 +405,12 @@ def ler_csv(caminho_arquivo, user_id, confirmar_duplicatas=False):
             "duplicatas": duplicatas
         }
 
-    id_importacao = registrar_importacao(caminho_arquivo, origem, user_id)
+    id_importacao = registrar_importacao(
+        caminho_arquivo,
+        origem,
+        user_id,
+        nome_arquivo_original
+    )
 
     salvar_transacoes_importadas(
         transacoes=transacoes,
