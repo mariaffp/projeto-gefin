@@ -4,7 +4,7 @@ from dash import html, Input, Output, State, callback, dcc
 # Baseado nesse modelo https://www.dash-bootstrap-components.com/docs/components/navbar/
 
 #def create_navbar():
-def create_navbar(perfil="NORMAL"):
+def create_navbar(perfil="NORMAL", nome="Usuário"):
     # Navigation Links (inside dbc.Nav)
     nav_links = [
         dbc.NavItem(dbc.NavLink("Página Inicial", href="/dashboard", active="exact", className="glass-nav-link px-3")),
@@ -44,7 +44,7 @@ def create_navbar(perfil="NORMAL"):
                         # perfil e botao de sair
                         html.Div(
                             [
-                                html.Span("Nome", className="glass-nav-text mx-3"),
+                                html.Span(f"{nome}", className="glass-nav-text mx-3"),
                                 dbc.Button("Sair", id="btn-logout", color="primary", size="sm", outline=True, className="glass-btn"),
                                 dcc.Location(id="logout-redirect", refresh=True)
                             ],
@@ -60,12 +60,14 @@ def create_navbar(perfil="NORMAL"):
         ),
         color="transparent",  
         dark=False,
-        className="glass-navbar mx-auto mt-3",
+        #className="glass-navbar mx-auto",
+        className="glass-navbar",
         style={
             "width": "90%",
             "maxWidth": "1200px",
             "borderRadius": "16px",
-            "padding": "10px 20px"
+            "padding": "10px 20px",
+            "marginTop": "16px"
         }
     )
     

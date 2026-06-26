@@ -5,7 +5,7 @@ import os
 from dotenv import load_dotenv
 from supabase_client import supabase
 from components.navbar import create_navbar
-from services.usuario import buscar_perfil, eh_financeiro
+from services.usuario import buscar_perfil, eh_financeiro, buscar_usuario
 
 load_dotenv()
 
@@ -16,8 +16,21 @@ app.layout = html.Div([
     dcc.Location(id="url", refresh=False),
     html.Div(id="global-navbar-container"),
     html.Div(id="auth-check"),
-    dash.page_container
+    #html.Div(dash.page_container, style={"paddingTop": "90px"}) versao 2
+    #dash.page_container versao 1
+    html.Div(dash.page_container, id="page-content-wrapper")
 ])
+@app.callback(
+    Output("page-content-wrapper", "style"),
+    Input("url", "pathname")
+)
+def ajustar_padding(pathname):
+    paginas_publicas = ["/", "/login"]
+    if pathname in paginas_publicas:
+        return {"paddingTop": "0px"}
+    return {"paddingTop": "90px"}
+
+
 @app.callback(
     [Output("auth-check", "children"),
     Output("global-navbar-container", "children")],
@@ -44,12 +57,18 @@ def verificar_autenticacao(pathname, search):
     if session is None:
         return dcc.Location(href="/", id="redirecionar-auth", refresh=True), ""
 
-    perfil = buscar_perfil(session.user.id)
+    usuario = buscar_usuario(session.user.id)
+    #print("DEBUG usuario:", usuario)
+    #print("DEBUG session.user.id:", session.user.id)
+    nome = usuario["nome"] if usuario else "Usuário"
+    perfil = usuario["perfil"] if usuario else buscar_perfil(session.user.id)
+    #perfil = buscar_perfil(session.user.id)
     paginas_financeiro = ["/transacoes", "/relatorios", "/importacao"]
     if pathname in paginas_financeiro and not eh_financeiro(perfil):
         return dcc.Location(href="/dashboard", id="redirecionar-perfil", refresh=True), create_navbar(perfil)
 
-    return "", create_navbar(perfil)
+    return "", create_navbar(perfil, nome)
+
 
 if __name__ == "__main__":
     app.run(debug=True)
