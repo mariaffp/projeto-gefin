@@ -1,17 +1,24 @@
 import base64
 import os
 import tempfile
+from datetime import datetime
 import dash
 from dash import html, dcc, Input, Output, State, callback
 import dash_bootstrap_components as dbc
+from supabase_client import supabase
 from services.importacao import ler_csv, listar_importacoes
-from datetime import datetime
 
 
 dash.register_page(__name__, path="/importacao", name="Importação")
 
 
-USER_ID_TESTE = "016c3a58-47de-4068-b57a-5135c57e756d"
+def obter_user_id_logado():
+    session = supabase.auth.get_session()
+
+    if session is None:
+        raise Exception("Usuário não autenticado")
+
+    return session.user.id
 
 
 layout = dbc.Container([
@@ -137,6 +144,8 @@ def importar_arquivo(n_clicks, contents, filename):
     caminho_temp = None
 
     try:
+        user_id = obter_user_id_logado()
+
         _, content_string = contents.split(",")
         decoded = base64.b64decode(content_string)
 
@@ -146,11 +155,11 @@ def importar_arquivo(n_clicks, contents, filename):
 
         resultado = ler_csv(
             caminho_temp,
-            USER_ID_TESTE,
+            user_id,
             nome_arquivo_original=filename
         )
 
-        historico = montar_lista_importacoes(USER_ID_TESTE)
+        historico = montar_lista_importacoes(user_id)
 
         if resultado["status"] == "duplicatas_encontradas":
             return (
@@ -204,6 +213,8 @@ def confirmar_importacao_duplicada(n_clicks, dados_arquivo):
     caminho_temp = None
 
     try:
+        user_id = obter_user_id_logado()
+
         _, content_string = dados_arquivo["contents"].split(",")
         decoded = base64.b64decode(content_string)
 
@@ -213,12 +224,12 @@ def confirmar_importacao_duplicada(n_clicks, dados_arquivo):
 
         resultado = ler_csv(
             caminho_temp,
-            USER_ID_TESTE,
+            user_id,
             confirmar_duplicatas=True,
             nome_arquivo_original=dados_arquivo["filename"]
         )
 
-        historico = montar_lista_importacoes(USER_ID_TESTE)
+        historico = montar_lista_importacoes(user_id)
 
         return (
             dbc.Alert(resultado["mensagem"], color="success"),
@@ -261,7 +272,7 @@ def cancelar_importacao_duplicada(n_clicks):
     prevent_initial_call="initial_duplicate"
 )
 def carregar_historico(_):
-    return montar_lista_importacoes(USER_ID_TESTE)
+    return montar_lista_importacoes(obter_user_id_logado())
 
 
 def montar_lista_importacoes(user_id):
