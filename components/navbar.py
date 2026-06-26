@@ -8,11 +8,11 @@ def create_navbar(perfil="NORMAL"):
     # Navigation Links (inside dbc.Nav)
     nav_links = [
         dbc.NavItem(dbc.NavLink("Página Inicial", href="/dashboard", active="exact", className="glass-nav-link px-3")),
+        dbc.NavItem(dbc.NavLink("Relatórios", href="/relatorios", active="exact", className="glass-nav-link px-3")),
     ]
     if perfil in ["FINANCEIRO", "ADMIN"]:
         nav_links.extend([
             dbc.NavItem(dbc.NavLink("Transações", href="/transacoes", active="exact", className="glass-nav-link px-3")),
-            dbc.NavItem(dbc.NavLink("Relatórios", href="/relatorios", active="exact", className="glass-nav-link px-3")),
             dbc.NavItem(dbc.NavLink("Importação", href="/importacao", active="exact", className="glass-nav-link px-3")),
         ])
     if perfil == "ADMIN":
