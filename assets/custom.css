@@ -6,7 +6,7 @@ body {
     background-attachment: fixed;
     margin: 0;
     padding: 0;
-    /* Removed padding-top since navbar is no longer fixed to the screen */
+    /*padding-top: 90px;*/
 }
 
 .glass-box {
@@ -22,6 +22,11 @@ body {
 
 /* Glassmorphism navbar*/
 .glass-navbar {
+    position: fixed !important;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1030;
     background: rgb(46, 126, 232) !important;
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(15px);

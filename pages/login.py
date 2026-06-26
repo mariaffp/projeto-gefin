@@ -213,9 +213,6 @@ def redirecionar_apos_google(search):
             # Busca o perfil e redireciona
             user_id = resposta.user.id
             perfil = buscar_perfil(user_id)
-
-            if eh_financeiro(perfil):
-                return "/teste"
             return "/dashboard"
 
         except Exception as e:
