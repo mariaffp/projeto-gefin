@@ -167,9 +167,6 @@ def login_email(n_clicks, email, senha):
         user_id = resposta.user.id
         perfil = buscar_perfil(user_id)
 
-        #verificando perfil
-        #if eh_financeiro(perfil):
-            #return "","/teste"
         return "","/dashboard" #se der certo, redireciona para a pagina principal do sistema
     except Exception as e:
         return "E-mail ou senha incorretos.", dash.no_update #tratamento de erro, caso nao encontre o login
