@@ -14,6 +14,16 @@ def buscar_perfil(user_id):
         print("ERRO no buscar_perfil:", e)  # ← vai mostrar o erro exato
         return None
 
+def buscar_usuario(user_id): #criei essa só para buscar o nome do usuario, mas poderia ser usada para buscar qualquer campo da tabela usuario
+    registro = (
+        supabase.table("usuario")
+        .select("nome, perfil")
+        .eq("id", user_id)
+        .single()
+        .execute()
+    )
+    return registro.data if registro.data else None
+
 
 def eh_admin(perfil):
     return perfil =='ADMIN' #Vai retornar True se perfil for admin e False se nao for
