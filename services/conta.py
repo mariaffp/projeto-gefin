@@ -43,11 +43,6 @@ def deletar_conta(user_id, id_conta):
         raise Exception("Conta não existe")
 
 
-def listar_contas(user_id):
-    perfil = buscar_perfil(user_id)
-
-    if not eh_financeiro(perfil):
-        raise Exception("Usuario sem permissão para listar contas")
-
+def listar_contas():
     return (supabase.table("conta").select("*").execute())
 

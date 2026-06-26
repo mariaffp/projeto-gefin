@@ -37,16 +37,7 @@ def ajustar_padding(pathname):
     [Input("url", "pathname"),
     Input("url", "search")]
 )
-#def verificar_autenticacao(pathname,search):
-    #paginas_publicas = ["/", "/login"]
-    #if pathname in paginas_publicas:
-        #return "", ""
-    #if search and "code=" in search:
-        #return "", create_navbar() # dcc.Location(href="/", id="redirecionar-auth", refresh=True)
-    #session = supabase.auth.get_session()
-    #if session is None:
-        #return dcc.Location(href="/", id="redirecionar-auth", refresh=True), ""
-    #return "", create_navbar()
+
 def verificar_autenticacao(pathname, search):
     paginas_publicas = ["/", "/login"]
     if pathname in paginas_publicas:
@@ -58,12 +49,10 @@ def verificar_autenticacao(pathname, search):
         return dcc.Location(href="/", id="redirecionar-auth", refresh=True), ""
 
     usuario = buscar_usuario(session.user.id)
-    #print("DEBUG usuario:", usuario)
-    #print("DEBUG session.user.id:", session.user.id)
     nome = usuario["nome"] if usuario else "Usuário"
     perfil = usuario["perfil"] if usuario else buscar_perfil(session.user.id)
-    #perfil = buscar_perfil(session.user.id)
-    paginas_financeiro = ["/transacoes", "/relatorios", "/importacao"]
+    paginas_financeiro = ["/transacoes", "/importacao"]
+    
     if pathname in paginas_financeiro and not eh_financeiro(perfil):
         return dcc.Location(href="/dashboard", id="redirecionar-perfil", refresh=True), create_navbar(perfil)
 
