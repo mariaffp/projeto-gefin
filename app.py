@@ -1,13 +1,14 @@
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+load_dotenv(Path(__file__).resolve().parent / ".env")
+
 from dash import Dash, html, dcc, Input, Output, callback
 import dash
 import dash_bootstrap_components as dbc
-import os
-from dotenv import load_dotenv
 from supabase_client import supabase
-from components.navbar import create_navbar
+from components.navbar import create_navbar, create_mobile_navbar
 from services.usuario import buscar_perfil, eh_financeiro, buscar_usuario
-
-load_dotenv()
 
 app = Dash(__name__, use_pages= True, external_stylesheets=[dbc.themes.ZEPHYR, "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"], suppress_callback_exceptions=True) # tema zephyr
 server = app.server
@@ -15,6 +16,7 @@ server = app.server
 app.layout = html.Div([
     dcc.Location(id="url", refresh=False),
     html.Div(id="global-navbar-container"),
+    html.Div(id="mobile-navbar-container"),
     html.Div(id="auth-check"),
     html.Div(dash.page_container, id="page-content-wrapper")
 ])
@@ -31,7 +33,8 @@ def ajustar_padding(pathname):
 
 @app.callback(
     [Output("auth-check", "children"),
-    Output("global-navbar-container", "children")],
+    Output("global-navbar-container", "children"),
+    Output("mobile-navbar-container", "children")],
     [Input("url", "pathname"),
     Input("url", "search")]
 )
@@ -39,11 +42,11 @@ def ajustar_padding(pathname):
 def verificar_autenticacao(pathname, search):
     paginas_publicas = ["/", "/login"]
     if pathname in paginas_publicas:
-        return "", ""
+        return "", "", ""
     
     session = supabase.auth.get_session()
     if session is None:
-        return dcc.Location(href="/", id="redirecionar-auth", refresh=True), ""
+        return dcc.Location(href="/", id="redirecionar-auth", refresh=True), "", ""
 
     usuario = buscar_usuario(session.user.id)
     nome = usuario["nome"] if usuario else "Usuário"
@@ -51,10 +54,22 @@ def verificar_autenticacao(pathname, search):
     paginas_financeiro = ["/transacoes", "/importacao"]
     
     if pathname in paginas_financeiro and not eh_financeiro(perfil):
-        return dcc.Location(href="/dashboard", id="redirecionar-perfil", refresh=True), create_navbar(perfil)
+        return dcc.Location(href="/dashboard", id="redirecionar-perfil", refresh=True), create_navbar(perfil), create_mobile_navbar(perfil)
 
-    return "", create_navbar(perfil, nome)
+    return "", create_navbar(perfil, nome), create_mobile_navbar(perfil, nome)
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    import socket
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        lan_ip = s.getsockname()[0]
+        s.close()
+    except Exception:
+        lan_ip = "SEU_IP_LOCAL"
+
+    print(f" desktop:  http://localhost:8050")
+    print(f" celular:  http://{lan_ip}:8050")
+
+    app.run(debug=True, host="0.0.0.0", port=8050)

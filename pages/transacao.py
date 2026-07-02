@@ -346,10 +346,10 @@ layout = dbc.Container([
     # botoes de acao
     dbc.Row([
         dbc.Col([
-            dbc.Button("Nova Transação", id="btn-nova-transacao", color="success", className="me-2 shadow-sm fw-bold"),
-            dbc.Button("Editar Selecionada", id="btn-editar", color="warning", className="me-2 text-white shadow-sm fw-bold"),
-            dbc.Button("Excluir Selecionadas", id="btn-excluir", color="danger", className="shadow-sm fw-bold"),
-        ], width=12, className="mb-3 d-flex justify-content-start")
+            dbc.Button("Nova Transação", id="btn-nova-transacao", color="success", className="mb-2 me-sm-2 shadow-sm fw-bold"),
+            dbc.Button("Editar Selecionada", id="btn-editar", color="warning", className="mb-2 me-sm-2 text-white shadow-sm fw-bold"),
+            dbc.Button("Excluir Selecionadas", id="btn-excluir", color="danger", className="mb-2 shadow-sm fw-bold"),
+        ], width=12, className="mb-3 d-flex justify-content-start flex-wrap")
     ]),
 
     # tabela

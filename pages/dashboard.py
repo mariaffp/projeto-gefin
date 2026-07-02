@@ -60,13 +60,13 @@ def montar_kpis(ano, mes):
     ]
 
 
-def layout():
+def layout(**kwargs):
     return dbc.Container([
         dbc.Row(
             [
                 dbc.Col(
                     html.H2(f"Visão Geral Financeira - {mes_atual}", id="titulo-dashboard", className="fw-normal text-dark"),
-                    width="auto"
+                    xs=12, md="auto"
                 ),
                 dbc.Col(
                     dbc.Select(
@@ -76,10 +76,10 @@ def layout():
                 ],
                 value=mes_atual,
                 className="shadow-sm",
-                style={"width": "150px"}
+                style={"width": "100%", "maxWidth": "150px"}
                     ),
-                    width="auto",
-                    className="ms-auto"
+                    xs=6, md="auto",
+                    className="ms-md-auto mt-2 mt-md-0"
                 ),
                 dbc.Col(
                     dbc.Select(
@@ -87,9 +87,10 @@ def layout():
                         options=opcoes_ano,
                         value=ano_atual,
                         className="shadow-sm",
-                        style={"width": "100px"}
+                        style={"width": "100%", "maxWidth": "100px"}
                     ),
-                    width="auto"
+                    xs=6, md="auto",
+                    className="mt-2 mt-md-0"
                     ),
             ],
             className="my-4 align-items-center"
