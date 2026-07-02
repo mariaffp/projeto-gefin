@@ -21,7 +21,7 @@ from reportlab.lib.utils import ImageReader
 dash.register_page(__name__, path='/relatorios', name="Relatórios")
 
 
-def layout():
+def layout(**kwargs):
     #Busco todas as categorias e contas do banco de dados e armazeno elas nas variaveis
     categorias = listar_categorias() 
     contas = listar_contas()
@@ -134,7 +134,7 @@ dbc.Card([
                     className="mt-2"
                 ),
                 width=12,
-                className="d-flex justify-content-end"
+                className="d-flex justify-content-start justify-content-sm-end"
             )
         ])
     ]),
@@ -177,7 +177,7 @@ dbc.Card([
                     color="secondary",
                     size="sm"
                 ),
-            ], className="d-flex justify-content-end mt-4"),
+            ], className="d-flex justify-content-start justify-content-sm-end flex-wrap mt-4"),
             width=12
         )
         ])  
