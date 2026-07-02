@@ -3,6 +3,7 @@ from dash import html, Input, Output, callback, dcc
 import dash_bootstrap_components as dbc
 from supabase_client import supabase
 from datetime import datetime
+from services.dashboard import ( tem_movimentacao_no_mes, calcular_saldo_ate, calcular_despesas_mes, calcular_previsao_caixa,)
 
 dash.register_page(__name__, path='/dashboard', name="Dashboard")
 
@@ -13,6 +14,13 @@ meses_extenso = {
 }
 
 mes_atual = meses_extenso[datetime.now().month]
+ano_atual = datetime.now().year
+meses_numero = {v: k for k, v in meses_extenso.items()} #Só estou pegando o numero do mes ao inves do nome do mes
+
+ANO_INICIAL = 2026
+opcoes_ano = [
+    {"label": str(ano), "value": ano} for ano in range(ANO_INICIAL, ano_atual + 1 )
+]
 
 #funcao pra criar os cards que mostram os valores
 def create_kpi_card(title, value, text_class="text-white"):
@@ -30,8 +38,30 @@ def create_kpi_card(title, value, text_class="text-white"):
         style={"borderRadius": "8px"}
     )
 
-layout = dbc.Container(
-    [
+def montar_kpis(ano, mes):
+    #vou pegar os dados do banco de dados para colocar nos cards
+
+    saldo = calcular_saldo_ate(ano,mes)
+    sem_movimentacao = not tem_movimentacao_no_mes(ano,mes)
+
+    if sem_movimentacao:
+        texto_despesas = "Sem movimentações"
+        texto_previsao = "Sem movimentações"
+    else:
+        despesas = calcular_despesas_mes(ano, mes)
+        previsao = calcular_previsao_caixa(ano,mes)
+        texto_despesas = f"R$ {despesas:.2f}"
+        texto_previsao = f"R$ {previsao:.2f}"
+
+    return [
+        create_kpi_card("Saldo Atual:", f"R$ {saldo:.2f}", "text-success"),
+        create_kpi_card("Despesas:", texto_despesas, "text-danger"),
+        create_kpi_card("Previsão do caixa:", texto_previsao, "text-warning"),
+    ]
+
+
+def layout():
+    return dbc.Container([
         dbc.Row(
             [
                 dbc.Col(
@@ -42,18 +72,7 @@ layout = dbc.Container(
                     dbc.Select(
                         id="selecao-mes",
                         options=[
-                    {"label": "Janeiro", "value": "Janeiro"},
-                    {"label": "Fevereiro", "value": "Fevereiro"},
-                    {"label": "Março", "value": "Março"},
-                    {"label": "Abril", "value": "Abril"},
-                    {"label": "Maio", "value": "Maio"},
-                    {"label": "Junho", "value": "Junho"},
-                    {"label": "Julho", "value": "Julho"},
-                    {"label": "Agosto", "value": "Agosto"},
-                    {"label": "Setembro", "value": "Setembro"},
-                    {"label": "Outubro", "value": "Outubro"},
-                    {"label": "Novembro", "value": "Novembro"},
-                    {"label": "Dezembro", "value": "Dezembro"},
+                    {"label": nome, "value": nome} for nome in meses_extenso.values()
                 ],
                 value=mes_atual,
                 className="shadow-sm",
@@ -61,7 +80,17 @@ layout = dbc.Container(
                     ),
                     width="auto",
                     className="ms-auto"
-                )
+                ),
+                dbc.Col(
+                    dbc.Select(
+                        id="selecao-ano",
+                        options=opcoes_ano,
+                        value=ano_atual,
+                        className="shadow-sm",
+                        style={"width": "100px"}
+                    ),
+                    width="auto"
+                    ),
             ],
             className="my-4 align-items-center"
         ),
@@ -69,32 +98,19 @@ layout = dbc.Container(
             dbc.Row(
                 [
                     dbc.Col(
-                        [
-                        create_kpi_card("Saldo Atual:", "R$ 5.000,00", "text-success"),
-                        create_kpi_card("Despesas:", "R$ 2.000,00", "text-danger"),
-                        create_kpi_card("Previsão do caixa:", "R$ 3.000,00", "text-warning"),
-                        ],
-                        xs=12, md=3,
-                        className="mb-4 mb-md-0"
+                    html.Div(
+                        id="kpi-cards-container",
+                        children=montar_kpis(ano_atual, datetime.now().month)
                     ),
+                    xs=12, md=3,
+                    className="mb-4 mb-md-0"
+                ),
 
                     dbc.Col(
                         html.Div(
                             [
                                 html.H3("Dashboard em construção", className="text-secondary fw-light mb-2"),
                                 html.P("Os graficos estarão aqui eu espero", className="text-muted small"),
-                                #dbc.Button(
-                                    #"Importação de Extratos",
-                                    #href="/importacao",
-                                    #color="primary",
-                                    #className="mt-3 me-2"
-                                #),
-                                #dbc.Button(
-                                    #"Transações",
-                                    #href="/transacoes",
-                                    #color="secondary",
-                                    #className="mt-3"
-                                #),
                                 
                             ],
                             id="dashboard-content",
@@ -123,8 +139,11 @@ layout = dbc.Container(
 #altera o titulo de acordo com o mes selecionando
 @callback(
     Output("titulo-dashboard", "children"),
-    Input("selecao-mes", "value")
+    Output("kpi-cards-container", "children"),
+    Input("selecao-mes", "value"),
+    Input("selecao-ano", "value")
 )
-def atualizar_titulo(mes_selecionado):
-    # Retorna o texto formatado que vai substituir o "children" do html.H2
-    return f"Visão Geral Financeira - {mes_selecionado}"
+def atualizar_dashboard(mes_selecionado, ano_selecionado):
+    numero_mes = meses_numero[mes_selecionado]
+    novos_kpis = montar_kpis(int(ano_selecionado), numero_mes)
+    return f"Visão Geral Financeira - {mes_selecionado} de {ano_selecionado}", novos_kpis

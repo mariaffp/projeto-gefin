@@ -16,8 +16,6 @@ app.layout = html.Div([
     dcc.Location(id="url", refresh=False),
     html.Div(id="global-navbar-container"),
     html.Div(id="auth-check"),
-    #html.Div(dash.page_container, style={"paddingTop": "90px"}) versao 2
-    #dash.page_container versao 1
     html.Div(dash.page_container, id="page-content-wrapper")
 ])
 @app.callback(
@@ -42,8 +40,7 @@ def verificar_autenticacao(pathname, search):
     paginas_publicas = ["/", "/login"]
     if pathname in paginas_publicas:
         return "", ""
-    #if search and "code=" in search:
-        #return "", ""
+    
     session = supabase.auth.get_session()
     if session is None:
         return dcc.Location(href="/", id="redirecionar-auth", refresh=True), ""
