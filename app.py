@@ -5,7 +5,7 @@ import os
 from dotenv import load_dotenv
 from supabase_client import supabase
 from components.navbar import create_navbar
-from services.usuario import buscar_perfil, eh_financeiro, buscar_usuario
+from services.usuario import buscar_perfil, eh_financeiro, buscar_usuario, eh_admin
 
 load_dotenv()
 
@@ -66,7 +66,18 @@ def verificar_autenticacao(pathname, search):
     paginas_financeiro = ["/transacoes", "/relatorios", "/importacao"]
     if pathname in paginas_financeiro and not eh_financeiro(perfil):
         return dcc.Location(href="/dashboard", id="redirecionar-perfil", refresh=True), create_navbar(perfil)
+        
+    paginas_admin = ["/admin"]
 
+    if pathname in paginas_admin and not eh_admin(perfil):
+        return (
+            dcc.Location(
+                href="/dashboard",
+                id="redirecionar-admin",
+                refresh=True
+            ),
+            create_navbar(perfil, nome)
+    )
     return "", create_navbar(perfil, nome)
 
 

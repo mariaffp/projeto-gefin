@@ -43,15 +43,42 @@ def cadastrar_usuario(email, senha, nome, perfil):
             },
             "email_confirm": True  # já confirma o email automaticamente, podemos tirar talvez
         })
-        
+        #Atualiza sempre o nome
+        supabase.table("usuario")\
+            .update({"nome": nome})\
+            .eq("id", resposta.user.id)\
+            .execute()
+
         # Atualiza o perfil se não for NORMAL
         if perfil != 'NORMAL':
             supabase.table("usuario") \
-                .update({"perfil": perfil}) \
+                .update({
+                    "perfil": perfil}) \
                 .eq("id", resposta.user.id) \
                 .execute()
 
         return True
     except Exception as e:
         print("ERRO ao cadastrar usuário:", e)
+        return False
+
+def listar_usuarios():
+    registro = supabase_admin.table("usuario").select("id, nome, perfil").order("nome").execute()
+    return registro.data if registro.data else []
+
+def atualizar_perfil_usuario(user_id, novo_perfil):
+    try:
+        supabase_admin.table("usuario").update({"perfil": novo_perfil}).eq("id", user_id).execute()
+        return True
+    except Exception as e:
+        print("ERRO ao atualizar perfil:", e)
+        return False
+
+def deletar_usuario(user_id):
+    try:
+        # apaga do auth.users -> se tiver ON DELETE CASCADE na FK, a linha de "usuario" some junto
+        supabase_admin.auth.admin.delete_user(user_id)
+        return True
+    except Exception as e:
+        print("ERRO ao deletar usuário:", e)
         return False
