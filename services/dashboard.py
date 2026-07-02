@@ -12,10 +12,11 @@ def calcular_saldo_ate(ano, mes):
     saldo = 0
 
     for t in resposta.data:
+        valor = abs(t["valor"])
         if t["tipo"] == "ENTRADA":
-            saldo += t["valor"]
+            saldo += valor
         else:
-            saldo -= t["valor"]
+            saldo -= valor
 
     return saldo
 
@@ -29,7 +30,8 @@ def calcular_despesas_mes(ano, mes):
 
     soma = 0
     for t in resposta.data:
-        soma += t["valor"]
+        valor = abs(t["valor"])
+        soma += valor
 
     return soma
 
@@ -42,7 +44,8 @@ def calcular_entradas_mes(ano, mes):
 
     soma = 0
     for t in resposta.data:
-        soma += t["valor"]
+        valor = abs(t["valor"])
+        soma += valor
 
     return soma
 
