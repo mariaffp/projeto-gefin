@@ -200,11 +200,27 @@ body {
     .table-responsive {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
+        max-width: 100%;
     }
     
     .container-fluid {
         padding-left: 12px;
         padding-right: 12px;
+    }
+
+    /* area do relatorio*/
+    #area-relatorio-gerado {
+        max-width: 100% !important;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .SingleDatePicker,
+    .DateInput {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    .SingleDatePickerInput {
+        width: 100% !important;
     }
 
     /* navbar bottom */

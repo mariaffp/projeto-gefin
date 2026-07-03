@@ -23,7 +23,7 @@ dash.register_page(__name__, path='/relatorios', name="Relatórios")
 
 def layout(**kwargs):
     #Busco todas as categorias e contas do banco de dados e armazeno elas nas variaveis
-    categorias = listar_categorias() 
+    categorias = listar_categorias()
     contas = listar_contas()
 
     #Criando as opçoes que vão realmente aparecer para o usuario e os valores delas que o sistema precisa reconhecer
@@ -155,7 +155,7 @@ dbc.Card([
                                     className="text-muted fw-normal"),
                         ],
                         id="area-relatorio-gerado",
-                        className="d-flex flex-column align-items-center justify-content-center py-5 border rounded bg-light text-secondary",
+                        className="d-flex flex-column align-items-center justify-content-center py-5 border rounded bg-light text-secondary area-relatorio-vazia",
                         style={"minHeight": "300px", "borderStyle": "dashed !important"}
                     )
                 ),
@@ -222,6 +222,8 @@ def calcular_periodo(periodo, data_inicio_custom, data_fim_custom):
 #  aplica os filtros e busca no banco 
 @callback(
     Output("area-relatorio-gerado", "children"), #atualiza onde o relatorio vai ser mostrado
+    Output("area-relatorio-gerado", "className"), #atualiza a classe do container
+    Output("area-relatorio-gerado", "style"), #atualiza o estilo do container
     Output("store-transacoes-filtradas", "data"), #salva as transações filtradas para depois poder exportar
     Input("btn-aplicar-filtros", "n_clicks"),
     Input("filtro-categoria", "value"),
@@ -234,20 +236,20 @@ def calcular_periodo(periodo, data_inicio_custom, data_fim_custom):
 )
 def gerar_relatorio(n_clicks, id_categoria, tipo, periodo, id_conta, data_inicio_custom, data_fim_custom):
     if not n_clicks:
-        return dash.no_update, dash.no_update
+        return dash.no_update, dash.no_update, dash.no_update, dash.no_update
 
     data_inicio, data_fim = calcular_periodo(periodo, data_inicio_custom, data_fim_custom)
 
     try:
         transacoes = listar_transacoes_relatorio(id_categoria=id_categoria, tipo=tipo, id_conta=id_conta, data_inicio=data_inicio, data_fim=data_fim,)
     except Exception as e:
-        return html.Div(f"Erro ao buscar transações: {e}", className="text-danger"), []
+        return html.Div(f"Erro ao buscar transações: {e}", className="text-danger"), "", {}, []
 
     if not transacoes:
         return html.Div(
             "Nenhuma transação encontrada para os filtros selecionados.",
             className="text-muted text-center py-5"
-        ), []
+        ), "", {}, []
 
     # Montando uma tabela com o resultado
     linhas = []
@@ -272,7 +274,7 @@ def gerar_relatorio(n_clicks, id_categoria, tipo, periodo, id_conta, data_inicio
         html.Tbody(linhas)
     ], bordered=True, hover=True, responsive=True, className="mt-3 text-dark")
 
-    return tabela, transacoes
+    return tabela, "w-100", {}, transacoes
 
 
 @callback(
