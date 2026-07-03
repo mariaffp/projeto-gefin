@@ -8,11 +8,11 @@ def create_navbar(perfil="NORMAL", nome="Usuário"):
     # Navigation Links (inside dbc.Nav)
     nav_links = [
         dbc.NavItem(dbc.NavLink("Página Inicial", href="/dashboard", active="exact", className="glass-nav-link px-3")),
+        dbc.NavItem(dbc.NavLink("Relatórios", href="/relatorios", active="exact", className="glass-nav-link px-3")),
     ]
     if perfil in ["FINANCEIRO", "ADMIN"]:
         nav_links.extend([
             dbc.NavItem(dbc.NavLink("Transações", href="/transacoes", active="exact", className="glass-nav-link px-3")),
-            dbc.NavItem(dbc.NavLink("Relatórios", href="/relatorios", active="exact", className="glass-nav-link px-3")),
             dbc.NavItem(dbc.NavLink("Importação", href="/importacao", active="exact", className="glass-nav-link px-3")),
         ])
     if perfil == "ADMIN":
@@ -74,6 +74,49 @@ def create_navbar(perfil="NORMAL", nome="Usuário"):
     return navbar
 
 
+def create_mobile_navbar(perfil="NORMAL", nome="Usuário"):
+    itens = [
+        {"href": "/dashboard", "icon": "bi-house-fill", "label": "Início"},
+        {"href": "/relatorios", "icon": "bi-bar-chart-fill", "label": "Relatórios"},
+    ]
+    if perfil in ["FINANCEIRO", "ADMIN"]:
+        itens.extend([
+            {"href": "/transacoes", "icon": "bi-currency-exchange", "label": "Transações"},
+            {"href": "/importacao", "icon": "bi-cloud-arrow-up-fill", "label": "Importar"},
+        ])
+
+    nav_items = []
+    for item in itens:
+        nav_items.append(
+            dbc.NavLink(
+                [
+                    html.I(className=f"bi {item['icon']}"),
+                    html.Span(item["label"], className="mobile-nav-label"),
+                ],
+                href=item["href"],
+                active="exact",
+                className="mobile-nav-item",
+            )
+        )
+
+    nav_items.append(
+        html.Button(
+            [
+                html.I(className="bi bi-box-arrow-right"),
+                html.Span("Sair", className="mobile-nav-label"),
+            ],
+            id="mobile-btn-logout",
+            className="mobile-nav-item mobile-nav-logout",
+            n_clicks=0,
+        )
+    )
+
+    return html.Nav(
+        [dcc.Location(id="mobile-logout-redirect", refresh=True), *nav_items],
+        className="mobile-bottom-nav",
+        id="mobile-navbar",
+    )
+
 
 @callback(
     Output("navbar-collapse", "is_open"),
@@ -91,6 +134,16 @@ def toggle_navbar_collapse(n, is_open):
     prevent_initial_call=True
 )
 def fazer_logout(n_clicks):
+    from supabase_client import supabase
+    supabase.auth.sign_out()
+    return "/"
+
+@callback(
+    Output("mobile-logout-redirect", "href"),
+    Input("mobile-btn-logout", "n_clicks"),
+    prevent_initial_call=True
+)
+def fazer_logout_mobile(n_clicks):
     from supabase_client import supabase
     supabase.auth.sign_out()
     return "/"

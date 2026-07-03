@@ -1,9 +1,15 @@
 import dash
 from dash import html, Input, Output, callback, dcc
 import dash_bootstrap_components as dbc
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+from flask import request
+from urllib.parse import parse_qs
 from supabase_client import supabase
 from services.usuario import buscar_perfil, eh_financeiro
-from urllib.parse import parse_qs
+
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 #https://www.dash-bootstrap-components.com/docs/themes/explorer/
 #abram esse link ^, vai ter cada elemento pra vcs explorarem, e cliquem no livro azul, eles te mandam direto para o docs daquele elemento em especifico
@@ -114,7 +120,7 @@ layout = html.Div(
                         ])
                     ],
 
-                    className="glass-box p-5",
+                    className="glass-box p-4 p-md-5 login-box",
                     style={
                         "backgroundColor": COR_FUNDO_DIREITA,
                         "padding": "40px",
@@ -122,7 +128,7 @@ layout = html.Div(
                         "boxShadow": "0px 15px 35px rgba(0, 0, 0, 0.5)",
                         "width": "100%",
                         "maxWidth": "450px",
-                        "marginLeft": "8vw",
+                        "marginLeft": "0",
                         "zIndex": 2
                     }
                 ),
@@ -132,17 +138,20 @@ layout = html.Div(
                     data="/assets/Focus_consultoria.svg",
                     type="image/svg+xml",
                     style={
-                        "width": "400px",
-                        "height": "400px",
-                        "marginRight": "8vw",
+                        "width": "100%",
+                        "maxWidth": "400px",
+                        "maxHeight": "60vh",
+                        "height": "auto",
+                        "marginRight": "0",
                         "pointerEvents": "none",
                         "zIndex": 0
-                    }
+                    },
+                    className="login-logo",
                 )
             ],
             # w-100 e justify-content-between organizam o espaço horizontalmente
-            className="d-flex align-items-center justify-content-between vh-100 w-100",
-            style={"position": "relative", "zIndex": 1}
+            className="d-flex align-items-center justify-content-between min-vh-100 w-100 login-main flex-column flex-lg-row",
+            style={"position": "relative", "zIndex": 1, "padding": "24px 48px", "gap": "24px"}
         )
     ],
     style={"fontFamily": "'Trade Gothic Next SR Pro Regular', sans-serif"}
@@ -167,9 +176,6 @@ def login_email(n_clicks, email, senha):
         user_id = resposta.user.id
         perfil = buscar_perfil(user_id)
 
-        #verificando perfil
-        #if eh_financeiro(perfil):
-            #return "","/teste"
         return "","/dashboard" #se der certo, redireciona para a pagina principal do sistema
     except Exception as e:
         return "E-mail ou senha incorretos.", dash.no_update #tratamento de erro, caso nao encontre o login
@@ -186,9 +192,10 @@ def login_google(n_clicks):
         return dash.no_update
 
     try: #solicita ao supabase o inicio do fluxo oauth com o google
+        redirect_url = f"http://{request.host}"
         response = supabase.auth.sign_in_with_oauth(
             {"provider": "google",
-            "options":{"redirect_to": "http://localhost:8050"}}
+            "options":{"redirect_to": redirect_url}}
         )
         return response.url #redireciona o navegador para a pag de autenticação
     except Exception as e:

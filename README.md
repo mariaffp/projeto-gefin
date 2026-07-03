@@ -1,4 +1,4 @@
-# projeto-gefin
+git# projeto-gefin
 GEFIN
 Sistema web para gestão financeira desenvolvido pela equipe da HorizonSolutions no processo seletivo da Focus em 2026.1.
 O intuito do sistema é centralizar o controle de transações, fluxo de caixa, dashboards e relatórios financeiros.
