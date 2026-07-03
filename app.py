@@ -69,7 +69,7 @@ def verificar_autenticacao(pathname, search):
         
     paginas_admin = ["/admin"]
 
-    if pathname in paginas_admin and not eh_admin(perfil):
+    if pathname.startswith("/admin") and not eh_admin(perfil):
         return (
             dcc.Location(
                 href="/dashboard",
