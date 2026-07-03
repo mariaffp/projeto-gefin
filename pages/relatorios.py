@@ -3,7 +3,7 @@ from dash import html, dcc, Input, Output, callback
 import dash_bootstrap_components as dbc
 #imports para gerar tabela e conexão com o banco de dados
 from datetime import date, timedelta
-from services.transacao import listar_transacoes
+from services.transacao import listar_transacoes_relatorio
 from services.categoria import listar_categorias
 from services.conta import listar_contas
 from supabase_client import supabase
@@ -239,7 +239,7 @@ def gerar_relatorio(n_clicks, id_categoria, tipo, periodo, id_conta, data_inicio
     data_inicio, data_fim = calcular_periodo(periodo, data_inicio_custom, data_fim_custom)
 
     try:
-        transacoes = listar_transacoes(id_categoria=id_categoria, tipo=tipo, id_conta=id_conta, data_inicio=data_inicio, data_fim=data_fim,)
+        transacoes = listar_transacoes_relatorio(id_categoria=id_categoria, tipo=tipo, id_conta=id_conta, data_inicio=data_inicio, data_fim=data_fim,)
     except Exception as e:
         return html.Div(f"Erro ao buscar transações: {e}", className="text-danger"), []
 
@@ -249,7 +249,7 @@ def gerar_relatorio(n_clicks, id_categoria, tipo, periodo, id_conta, data_inicio
             className="text-muted text-center py-5"
         ), []
 
-    # Montando uma tabela simples com o resultado
+    # Montando uma tabela com o resultado
     linhas = []
     for t in transacoes:
         nome_categoria = t["categoria"]["nome"] if t.get("categoria") else "—"
@@ -288,7 +288,7 @@ def exportar_csv(n_clicks, transacoes):
     if not transacoes:
         return dash.no_update
 
-    # Monta uma lista simplificada para o CSV
+    # Monta uma lista para o CSV
     linhas = []
     for t in transacoes:
         linhas.append({
