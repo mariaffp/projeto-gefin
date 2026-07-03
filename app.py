@@ -8,7 +8,7 @@ import dash
 import dash_bootstrap_components as dbc
 from supabase_client import supabase
 from components.navbar import create_navbar, create_mobile_navbar
-from services.usuario import buscar_perfil, eh_financeiro, buscar_usuario
+from services.usuario import buscar_perfil, eh_financeiro, buscar_usuario, eh_admin
 
 app = Dash(__name__, use_pages= True, external_stylesheets=[dbc.themes.ZEPHYR, "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"], suppress_callback_exceptions=True) # tema zephyr
 server = app.server
@@ -55,8 +55,19 @@ def verificar_autenticacao(pathname, search):
     
     if pathname in paginas_financeiro and not eh_financeiro(perfil):
         return dcc.Location(href="/dashboard", id="redirecionar-perfil", refresh=True), create_navbar(perfil), create_mobile_navbar(perfil)
+        
+    #paginas_admin = ["/admin"]
 
-    return "", create_navbar(perfil, nome), create_mobile_navbar(perfil, nome)
+    if pathname.startswith("/admin") and not eh_admin(perfil):
+        return (
+            dcc.Location(
+                href="/dashboard",
+                id="redirecionar-admin",
+                refresh=True
+            ),
+            create_navbar(perfil, nome), create_mobile_navbar(perfil,nome)
+    )
+    return "", create_navbar(perfil, nome), create_mobile_navbar(perfil,nome)
 
 
 if __name__ == "__main__":
