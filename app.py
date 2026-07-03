@@ -70,6 +70,5 @@ if __name__ == "__main__":
         lan_ip = "SEU_IP_LOCAL"
 
     print(f" desktop:  http://localhost:8050")
-    print(f" celular:  http://{lan_ip}:8050")
 
     app.run(debug=True, host="0.0.0.0", port=8050)
