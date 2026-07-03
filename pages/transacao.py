@@ -1101,6 +1101,7 @@ def salvar_transacao(
             dbc.Alert("Transação atualizada com sucesso.", color="success"),
             None,
             {"display": "none"},
+            False
         )
 
     resultado = criar_transacao(dados, user_id)
