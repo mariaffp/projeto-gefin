@@ -111,7 +111,7 @@ def montar_kpis(ano, mes):
             ),
         ]
 
-def layout():
+def layout(**kwargs):
     return dbc.Container([
         
         dbc.Row(
@@ -128,8 +128,8 @@ def layout():
                         className="shadow-sm border-0",
                         style={"width": "150px", "borderRadius": "8px"}
                     ),
-                    width="auto",
-                    className="ms-auto"
+                    xs=6, md="auto",
+                    className="ms-md-auto mt-2 mt-md-0"
                 ),
                 dbc.Col(
                     dbc.Select(
