@@ -2,7 +2,7 @@ from supabase_client import supabase, supabase_admin
 
 
 def buscar_perfil(user_id):
-    # select: quais colunas eu quero | eq: uma das colunas deve respeitar a seguinte igualdade | single: retorna só um registro | executa: para executar a consulta
+    # select: quais colunas eu quero | eq: uma das colunas deve respeitar a seguinte igualdade | single: retorna só um registro | execute: para executar a consulta
     try:
 
         registro = supabase.table("usuario").select("perfil").eq("id", user_id).single().execute()

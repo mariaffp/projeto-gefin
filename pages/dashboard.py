@@ -3,7 +3,9 @@ from dash import html, Input, Output, callback, dcc
 import dash_bootstrap_components as dbc
 from supabase_client import supabase
 from datetime import datetime
-from services.dashboard import ( tem_movimentacao_no_mes, calcular_saldo_ate, calcular_despesas_mes, calcular_previsao_caixa,)
+from services.dashboard import ( tem_movimentacao_no_mes, calcular_saldo_ate, calcular_despesas_mes, calcular_previsao_caixa, dados_entradas_saidas_por_mes, dados_despesas_por_categoria, dados_evolucao_saldo)
+import plotly.graph_objects as go
+
 
 dash.register_page(__name__, path='/dashboard', name="Dashboard")
 
@@ -13,14 +15,11 @@ meses_extenso = {
     9: "Setembro", 10: "Outubro", 11: "Novembro", 12: "Dezembro"
 }
 
-mes_atual = meses_extenso[datetime.now().month]
-ano_atual = datetime.now().year
+
 meses_numero = {v: k for k, v in meses_extenso.items()} #Só estou pegando o numero do mes ao inves do nome do mes
 
 ANO_INICIAL = 2026
-opcoes_ano = [
-    {"label": str(ano), "value": ano} for ano in range(ANO_INICIAL, ano_atual + 1 )
-]
+
 
 #funcao pra criar os cards que mostram os valores
 def create_kpi_card(title, value, tipo="neutro"):
@@ -112,6 +111,13 @@ def montar_kpis(ano, mes):
         ]
 
 def layout(**kwargs):
+    mes_atual = meses_extenso[datetime.now().month]
+    ano_atual = datetime.now().year
+    opcoes_ano = [
+    {"label": str(ano), "value": ano} for ano in range(ANO_INICIAL, ano_atual + 1 )
+]
+    
+
     return dbc.Container([
         
         dbc.Row(
@@ -153,32 +159,32 @@ def layout(**kwargs):
         ),
 
         
-        dbc.Row(
-            [
-                dbc.Col(
-                    html.Div(
-                        [
-                            html.H4("Dashboard em construção", className="text-secondary fw-light mb-2"),
-                            html.P("Os gráficos estarão aqui em breve", className="text-muted small"),
-                        ],
-                        id="dashboard-content",
-                        style={
-                            "backgroundColor": "white", # Fundo branco limpo
-                            "minHeight": "450px", 
-                            "display": "flex", 
-                            "flexDirection": "column",
-                            "justifyContent": "center", 
-                            "alignItems": "center",
-                            "borderRadius": "12px",
-                            "border": "1px solid #e9ecef",
-                            "boxShadow": "0 .125rem .25rem rgba(0,0,0,.075)" 
-                        },
-                        className="p-4"
+        dbc.Row([
+            dbc.Col([
+                dbc.Tabs([
+                    dbc.Tab(
+                        dcc.Graph(id="grafico-barras"),
+                        label="Entradas vs Saídas",
+                        tab_id="tab-barras"
                     ),
-                    xs=12 # Agora ocupa a tela toda de ponta a ponta
-                )
-            ]
-        )
+                    dbc.Tab(
+                        dcc.Graph(id="grafico-pizza"),
+                        label="Despesas por Categoria",
+                        tab_id="tab-pizza"
+                    ),
+                    dbc.Tab(
+                        dcc.Graph(id="grafico-linha"),
+                        label="Evolução do Saldo",
+                        tab_id="tab-linha"
+                    ),
+                ],
+                id="abas-dashboard",
+                active_tab="tab-barras",
+                className="mb-3"
+                ),
+            ], xs=12
+            )
+        ])
     ],
     fluid=True,
     className="py-3 px-4" 
@@ -195,3 +201,91 @@ def atualizar_dashboard(mes_selecionado, ano_selecionado):
     numero_mes = meses_numero[mes_selecionado]
     novos_kpis = montar_kpis(int(ano_selecionado), numero_mes)
     return f"Visão Geral Financeira - {mes_selecionado} de {ano_selecionado}", novos_kpis
+
+MESES_LABEL = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"]
+
+@callback(
+    Output("grafico-barras", "figure"),
+    Input("selecao-ano", "value")
+)
+def atualizar_barras(ano_selecionado):
+    ano = int(ano_selecionado)
+    entradas, saidas = dados_entradas_saidas_por_mes(ano)
+
+    figura = go.Figure([
+        go.Bar(name="Entradas", x=MESES_LABEL, y=entradas, marker_color="#28a745"),
+        go.Bar(name="Saídas", x=MESES_LABEL, y=saidas, marker_color="#dc3545")
+    ])
+
+    figura.update_layout(
+        barmode="group",
+        title=f"Entradas vs Saídas - {ano}",
+        plot_bgcolor="white",
+        paper_bgcolor="white",
+        yaxis=dict(tickprefix="R$ "),
+        legend = dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+    )
+    return figura
+
+@callback(
+    Output("grafico-pizza", "figure"),
+    Input("selecao-mes", "value"),
+    Input("selecao-ano", "value")
+)
+def atualizar_pizza(mes_selecionado, ano_selecionado):
+    numero_mes = meses_numero[mes_selecionado]
+    ano = int(ano_selecionado)
+    categorias = dados_despesas_por_categoria(ano,numero_mes)
+
+    if not categorias:
+        figura = go.Figure()
+        figura.update_layout(
+            title="Sem despesas este mês",
+            plot_bgcolor="white",
+            paper_bgcolor="white",
+        )
+        return figura
+    
+    figura = go.Figure([
+        go.Pie(
+            labels=list(categorias.keys()),
+            values=list(categorias.values()),
+            hole = 0.4,
+        )
+    ])
+
+    figura.update_layout(
+        title=f"Despesas por Categoria - {mes_selecionado}/{ano_selecionado}",
+        plot_bgcolor="white",
+        paper_bgcolor="white",
+    )
+    return figura
+
+@callback(
+    Output("grafico-linha", "figure"),
+    Input("selecao-ano", "value")
+)
+def atualizar_linha(ano_selecionado):
+    ano = int(ano_selecionado)
+    meses, saldos = dados_evolucao_saldo(ano)
+
+    labels = [MESES_LABEL[m - 1] for m in meses]
+
+    fig = go.Figure([
+        go.Scatter(
+            x=labels,
+            y=saldos,
+            mode="lines+markers",
+            line=dict(color="#3178d4", width=3),
+            marker=dict(size=8),
+            fill="tozeroy",
+            fillcolor="rgba(49, 120, 212, 0.1)"
+        )
+    ])
+    fig.update_layout(
+        title=f"Evolução do Saldo — {ano}",
+        plot_bgcolor="white",
+        paper_bgcolor="white",
+        yaxis=dict(tickprefix="R$ "),
+    )
+    return fig
