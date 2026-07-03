@@ -7,5 +7,4 @@ env/
 .vscode/
 *.log
 __pycache__/
-teste2.py 
 salvando_codigo.py
