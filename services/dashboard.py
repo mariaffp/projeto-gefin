@@ -1,13 +1,15 @@
 from supabase_client import supabase
 from datetime import date
 import calendar
+from services.utils import executar_com_retry
+
 
 def calcular_saldo_ate(ano, mes):
 
     ultimo_dia = calendar.monthrange(ano, mes)[1]
     data_limite = date(ano, mes, ultimo_dia).isoformat()
 
-    resposta = supabase.table("transacao").select("valor, tipo").lte("data", data_limite).execute()
+    resposta = executar_com_retry(lambda: supabase.table("transacao").select("valor, tipo").lte("data", data_limite).execute() )
 
     saldo = 0
 
@@ -26,7 +28,7 @@ def calcular_despesas_mes(ano, mes):
     primeiro_dia = date(ano, mes, 1).isoformat()
     ultimo_dia = date(ano, mes, calendar.monthrange(ano, mes)[1]).isoformat()
 
-    resposta = supabase.table("transacao").select("valor").eq( "tipo", "SAIDA").gte("data", primeiro_dia).lte("data", ultimo_dia).execute()
+    resposta = executar_com_retry(lambda: supabase.table("transacao").select("valor").eq( "tipo", "SAIDA").gte("data", primeiro_dia).lte("data", ultimo_dia).execute())
 
     soma = 0
     for t in resposta.data:
@@ -40,7 +42,7 @@ def calcular_entradas_mes(ano, mes):
     primeiro_dia = date(ano, mes, 1).isoformat()
     ultimo_dia = date(ano, mes, calendar.monthrange(ano, mes)[1]).isoformat()
 
-    resposta = supabase.table("transacao").select("valor").eq( "tipo", "ENTRADA").gte("data", primeiro_dia).lte("data", ultimo_dia).execute()
+    resposta = executar_com_retry(lambda: supabase.table("transacao").select("valor").eq( "tipo", "ENTRADA").gte("data", primeiro_dia).lte("data", ultimo_dia).execute())
 
     soma = 0
     for t in resposta.data:
@@ -90,7 +92,7 @@ def tem_movimentacao_no_mes(ano, mes):
     #Verifica se existe pelo menos uma transação no mês/ano informado.
     primeiro_dia = date(ano, mes, 1).isoformat()
     ultimo_dia = date(ano, mes, calendar.monthrange(ano, mes)[1]).isoformat()
-    resposta = supabase.table("transacao").select("id_transacao").gte("data", primeiro_dia).lte("data", ultimo_dia).limit(1).execute()
+    resposta = executar_com_retry(lambda: supabase.table("transacao").select("id_transacao").gte("data", primeiro_dia).lte("data", ultimo_dia).limit(1).execute())
 
     return len(resposta.data) > 0
 
@@ -105,7 +107,7 @@ def dados_evolucao_saldo(ano):
 
     inicio_ano = date(ano, 1, 1).isoformat()
     fim_ano = date(ano, 12, 31).isoformat()
-    resposta = supabase.table("transacao").select("valor, tipo, data").gte("data", inicio_ano).lte("data", fim_ano).execute()
+    resposta = executar_com_retry( lambda: supabase.table("transacao").select("valor, tipo, data").gte("data", inicio_ano).lte("data", fim_ano).execute())
     transacoes_ano = resposta.data
 
     saldo_acumulado = saldo_base
@@ -137,7 +139,7 @@ def dados_despesas_por_categoria(ano, mes):
     primeiro_dia = date(ano, mes, 1).isoformat()
     ultimo_dia = date(ano, mes, calendar.monthrange(ano, mes)[1]).isoformat()
 
-    resposta = supabase.table("transacao").select("valor, categoria(nome)").eq("tipo", "SAIDA").gte("data", primeiro_dia).lte("data", ultimo_dia).execute() 
+    resposta =executar_com_retry(lambda: supabase.table("transacao").select("valor, categoria(nome)").eq("tipo", "SAIDA").gte("data", primeiro_dia).lte("data", ultimo_dia).execute()) 
 
     categorias = {} 
     for t in resposta.data: 
@@ -149,11 +151,27 @@ def dados_despesas_por_categoria(ano, mes):
 
     return categorias
 
+def dados_despesas_por_categoria_ano(ano):
+
+    # Retorna o total de saídas agrupado por categoria para o ano inteiro.
+
+    inicio = date(ano, 1, 1).isoformat()
+    fim = date(ano, 12, 31).isoformat()
+
+    resposta = executar_com_retry(lambda: supabase.table("transacao").select("valor, categoria(nome)").eq("tipo", "SAIDA").gte("data", inicio).lte("data", fim).execute())
+
+    categorias = {}
+    for t in resposta.data:
+        nome = t["categoria"]["nome"] if t.get("categoria") else "Sem categoria"
+        categorias[nome] = categorias.get(nome, 0) + abs(t["valor"])
+
+    return categorias
+
 def dados_entradas_saidas_por_mes(ano): 
     inicio = date(ano, 1, 1).isoformat() 
     fim = date(ano, 12, 31).isoformat() 
 
-    resposta = supabase.table("transacao").select("valor, tipo, data").gte("data", inicio).lte("data", fim).execute() 
+    resposta = executar_com_retry(lambda: supabase.table("transacao").select("valor, tipo, data").gte("data", inicio).lte("data", fim).execute()) 
 
     entradas = [0] * 12
     saidas = [0] * 12

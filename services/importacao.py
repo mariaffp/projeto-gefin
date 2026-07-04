@@ -418,6 +418,9 @@ def ler_csv(caminho_arquivo, user_id, confirmar_duplicatas=False, nome_arquivo_o
         user_id=user_id
     )
 
+    registrar_log(user_id, "IMPORTACAO_EXTRATO", f"Arquivo '{nome_arquivo}' importado com {len(transacoes)} transações")
+
+
     return {
         "status": "sucesso",
         "mensagem": "Importação concluída com sucesso.",

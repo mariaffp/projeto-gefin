@@ -3,9 +3,8 @@ from dash import html, Input, Output, callback, dcc
 import dash_bootstrap_components as dbc
 from supabase_client import supabase
 from datetime import datetime
-from services.dashboard import ( tem_movimentacao_no_mes, calcular_saldo_ate, calcular_despesas_mes, calcular_previsao_caixa, dados_entradas_saidas_por_mes, dados_despesas_por_categoria, dados_evolucao_saldo)
+from services.dashboard import ( tem_movimentacao_no_mes, calcular_saldo_ate, calcular_despesas_mes, calcular_previsao_caixa, dados_entradas_saidas_por_mes, dados_despesas_por_categoria, dados_despesas_por_categoria_ano, dados_evolucao_saldo)
 import plotly.graph_objects as go
-
 
 dash.register_page(__name__, path='/dashboard', name="Dashboard")
 
@@ -162,28 +161,82 @@ def layout(**kwargs):
         dbc.Row([
             dbc.Col([
                 dbc.Tabs([
+
+                    # Aba 1 — Entradas vs Saídas
                     dbc.Tab(
-                        dcc.Graph(id="grafico-barras"),
+                        tab_id="tab-barras",
                         label="Entradas vs Saídas",
-                        tab_id="tab-barras"
+                        children=[
+                            dbc.Card([
+                                dbc.CardBody([
+                                    dbc.Row([
+                                        dbc.Col([
+                                            html.Label("Tipo", className="fw-semibold small"),
+                                            dcc.Dropdown(
+                                                id="filtro-barras-tipo",
+                                                options=[
+                                                    {"label": "Entradas e Saídas", "value": "ambos"},
+                                                    {"label": "Só Entradas", "value": "ENTRADA"},
+                                                    {"label": "Só Saídas", "value": "SAIDA"},
+                                                ],
+                                                value="ambos",
+                                                clearable=False,
+                                                searchable=False,
+                                                style={"width": "200px"}
+                                            )
+                                        ], width="auto")
+                                    ], className="mb-3"),
+                                    dcc.Graph(id="grafico-barras")
+                                ])
+                            ], className="border-0 shadow-sm mt-2")
+                        ]
                     ),
+
+                    # Aba 2 — Despesas por Categoria
                     dbc.Tab(
-                        dcc.Graph(id="grafico-pizza"),
-                        label="Despesas por Categoria",
-                        tab_id="tab-pizza"
+                        tab_id="tab-pizza",
+                        label="Despesas por Categoria (Mês)",
+                        children=[
+                            dbc.Card([
+                                dbc.CardBody([
+                                    dcc.Graph(id="grafico-pizza")
+                                ])
+                            ], className="border-0 shadow-sm mt-2")
+                        ]
                     ),
+
+                    # Aba 3 — Evolução do Saldo
                     dbc.Tab(
-                        dcc.Graph(id="grafico-linha"),
+                        tab_id="tab-linha",
                         label="Evolução do Saldo",
-                        tab_id="tab-linha"
+                        children=[
+                            dbc.Card([
+                                dbc.CardBody([
+                                    dcc.Graph(id="grafico-linha")
+                                ])
+                            ], className="border-0 shadow-sm mt-2")
+                        ]
                     ),
+
+                    # Aba 4 — Despesas por Categoria (Ano)
+                    dbc.Tab(
+                        tab_id="tab-pizza_ano",
+                        label="Despesas por Categoria (Ano)",
+                        children=[
+                            dbc.Card([
+                                dbc.CardBody([
+                                    dcc.Graph(id="grafico-pizza_ano")
+                                ])
+                            ], className="border-0 shadow-sm mt-2")
+                        ]
+                    ),
+
                 ],
                 id="abas-dashboard",
                 active_tab="tab-barras",
                 className="mb-3"
                 ),
-            ], xs=12
-            )
+            ], xs=12)
         ])
     ],
     fluid=True,
@@ -204,26 +257,42 @@ def atualizar_dashboard(mes_selecionado, ano_selecionado):
 
 MESES_LABEL = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"]
 
+
 @callback(
     Output("grafico-barras", "figure"),
-    Input("selecao-ano", "value")
+    Input("selecao-ano", "value"),
+    Input("filtro-barras-tipo", "value")
 )
-def atualizar_barras(ano_selecionado):
+def atualizar_barras(ano_selecionado, tipo_filtro):
     ano = int(ano_selecionado)
     entradas, saidas = dados_entradas_saidas_por_mes(ano)
 
-    figura = go.Figure([
-        go.Bar(name="Entradas", x=MESES_LABEL, y=entradas, marker_color="#28a745"),
-        go.Bar(name="Saídas", x=MESES_LABEL, y=saidas, marker_color="#dc3545")
-    ])
+    barras = []
 
+    if tipo_filtro in ("ambos", "ENTRADA"):
+        barras.append(go.Bar(
+            name="Entradas",
+            x=MESES_LABEL,
+            y=entradas,
+            marker_color="#28a745"
+        ))
+
+    if tipo_filtro in ("ambos", "SAIDA"):
+        barras.append(go.Bar(
+            name="Saídas",
+            x=MESES_LABEL,
+            y=saidas,
+            marker_color="#dc3545"
+        ))
+
+    figura = go.Figure(barras)
     figura.update_layout(
         barmode="group",
         title=f"Entradas vs Saídas - {ano}",
         plot_bgcolor="white",
         paper_bgcolor="white",
         yaxis=dict(tickprefix="R$ "),
-        legend = dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
     )
     return figura
 
@@ -256,6 +325,37 @@ def atualizar_pizza(mes_selecionado, ano_selecionado):
 
     figura.update_layout(
         title=f"Despesas por Categoria - {mes_selecionado}/{ano_selecionado}",
+        plot_bgcolor="white",
+        paper_bgcolor="white",
+    )
+    return figura
+
+@callback(
+    Output("grafico-pizza_ano", "figure"),
+    Input("selecao-ano", "value")
+)
+def atualizar_pizza_ano(ano_selecionado):
+    ano = int(ano_selecionado)
+    categorias = dados_despesas_por_categoria_ano(ano)
+
+    if not categorias:
+        figura = go.Figure()
+        figura.update_layout(
+            title=f"Sem despesas em {ano}",
+            plot_bgcolor="white",
+            paper_bgcolor="white",
+        )
+        return figura
+
+    figura = go.Figure([
+        go.Pie(
+            labels=list(categorias.keys()),
+            values=list(categorias.values()),
+            hole=0.4,
+        )
+    ])
+    figura.update_layout(
+        title=f"Despesas por Categoria — {ano}",
         plot_bgcolor="white",
         paper_bgcolor="white",
     )

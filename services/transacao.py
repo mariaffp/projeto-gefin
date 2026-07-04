@@ -1,5 +1,7 @@
 from supabase_client import supabase 
 from services.usuario import buscar_perfil, eh_financeiro
+from services.log import registrar_log
+
 
 
 def verificar_duplicatas(transacoes, user_id):
@@ -44,6 +46,8 @@ def criar_transacao(dados, user_id, confirmar_duplicata=False):
         .insert(dados)
         .execute()
     )
+
+    registrar_log(user_id, "TRANSACAO_CRIADA", f"Transação '{dados.get('descricao', '')}' criada")
 
     return {
         "status": "sucesso",
@@ -94,13 +98,17 @@ def editar_transacao(id_transacao, dados, user_id):
 
     buscar_transacao(id_transacao, user_id)
 
-    return (
+    resultado = (
         supabase.table("transacao")
         .update(dados)
         .eq("id_transacao", id_transacao)
         .eq("id_usuario", user_id)
         .execute()
     )
+
+    registrar_log(user_id, "TRANSACAO_EDITADA", f"Transação '{id_transacao}' editada")
+
+    return resultado
 
 
 def excluir_transacao(id_transacao, user_id):
@@ -111,14 +119,17 @@ def excluir_transacao(id_transacao, user_id):
 
     buscar_transacao(id_transacao, user_id)
 
-    return (
+    resultado = (
         supabase.table("transacao")
         .delete()
         .eq("id_transacao", id_transacao)
         .eq("id_usuario", user_id)
         .execute()
     )
+    
+    registrar_log(user_id, "TRANSACAO_DELETADA", f"Transação '{id_transacao}' deletada")
 
+    return resultado
 
 def salvar_transacoes_importadas(transacoes, id_importacao, user_id):
     perfil = buscar_perfil(user_id)
