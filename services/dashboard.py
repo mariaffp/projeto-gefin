@@ -1,20 +1,19 @@
 from supabase_client import supabase
-from datetime import date
+from datetime import date, datetime
 import calendar
 from services.utils import executar_com_retry
 
 
 def calcular_saldo_ate(ano, mes):
-
     ultimo_dia = calendar.monthrange(ano, mes)[1]
     data_limite = date(ano, mes, ultimo_dia).isoformat()
 
-    resposta = executar_com_retry(lambda: supabase.table("transacao").select("valor, tipo").lte("data", data_limite).execute() )
+    resposta = executar_com_retry(lambda: supabase.table("transacao").select("valor, tipo").lte("data", data_limite).execute())
 
     saldo = 0
-
     for t in resposta.data:
         valor = abs(t["valor"])
+
         if t["tipo"] == "ENTRADA":
             saldo += valor
         else:
@@ -24,164 +23,147 @@ def calcular_saldo_ate(ano, mes):
 
 
 def calcular_despesas_mes(ano, mes):
-
     primeiro_dia = date(ano, mes, 1).isoformat()
     ultimo_dia = date(ano, mes, calendar.monthrange(ano, mes)[1]).isoformat()
 
-    resposta = executar_com_retry(lambda: supabase.table("transacao").select("valor").eq( "tipo", "SAIDA").gte("data", primeiro_dia).lte("data", ultimo_dia).execute())
+    resposta = executar_com_retry(lambda: supabase.table("transacao").select("valor").eq("tipo", "SAIDA").gte("data", primeiro_dia).lte("data", ultimo_dia).execute())
 
-    soma = 0
-    for t in resposta.data:
-        valor = abs(t["valor"])
-        soma += valor
+    return sum(abs(t["valor"]) for t in resposta.data)
 
-    return soma
 
 def calcular_entradas_mes(ano, mes):
-
     primeiro_dia = date(ano, mes, 1).isoformat()
     ultimo_dia = date(ano, mes, calendar.monthrange(ano, mes)[1]).isoformat()
 
-    resposta = executar_com_retry(lambda: supabase.table("transacao").select("valor").eq( "tipo", "ENTRADA").gte("data", primeiro_dia).lte("data", ultimo_dia).execute())
+    resposta = executar_com_retry(lambda: supabase.table("transacao").select("valor").eq("tipo", "ENTRADA").gte("data", primeiro_dia).lte("data", ultimo_dia).execute())
 
-    soma = 0
-    for t in resposta.data:
-        valor = abs(t["valor"])
-        soma += valor
+    return sum(abs(t["valor"]) for t in resposta.data)
 
-    return soma
 
 def calcular_previsao_caixa(ano, mes):
-   
     hoje = date.today()
     ultimo_dia_mes = calendar.monthrange(ano, mes)[1]
-
     saldo_atual = calcular_saldo_ate(ano, mes)
 
-    # Se o mês já passou, a previsão é o próprio saldo final real
     if date(ano, mes, ultimo_dia_mes) < hoje:
         return saldo_atual
 
-    # Quantos dias já se passaram no mês (mínimo 1 para evitar divisão por zero)
-
-    if hoje.year == ano and hoje.month == mes:
-        dias_passados = max(hoje.day, 1)
-    else:
-        dias_passados = ultimo_dia_mes
-    
+    dias_passados = max(hoje.day, 1) if (hoje.year == ano and hoje.month == mes) else ultimo_dia_mes
     dias_restantes = ultimo_dia_mes - dias_passados
 
     entradas_mes = calcular_entradas_mes(ano, mes)
     despesas_mes = calcular_despesas_mes(ano, mes)
 
-    if dias_passados > 0:
-        media_entrada_diaria = entradas_mes / dias_passados
-        media_saida_diaria = despesas_mes / dias_passados
-    else:
-        media_entrada_diaria = 0
-        media_saida_diaria = 0
+    media_entrada = entradas_mes / dias_passados if dias_passados > 0 else 0
+    media_saida = despesas_mes / dias_passados if dias_passados > 0 else 0
 
-
-    previsao = saldo_atual + (media_entrada_diaria - media_saida_diaria) * dias_restantes
-
-    return previsao
+    return saldo_atual + (media_entrada - media_saida) * dias_restantes
 
 
 def tem_movimentacao_no_mes(ano, mes):
-
-    #Verifica se existe pelo menos uma transação no mês/ano informado.
     primeiro_dia = date(ano, mes, 1).isoformat()
     ultimo_dia = date(ano, mes, calendar.monthrange(ano, mes)[1]).isoformat()
-    resposta = executar_com_retry(lambda: supabase.table("transacao").select("id_transacao").gte("data", primeiro_dia).lte("data", ultimo_dia).limit(1).execute())
 
+    resposta = executar_com_retry(lambda: supabase.table("transacao").select("id_transacao").gte("data", primeiro_dia).lte("data", ultimo_dia).limit(1).execute())
     return len(resposta.data) > 0
 
 
-def dados_evolucao_saldo(ano): 
-    # SOLUÇÃO DO ERRO 500: Faz apenas 1 consulta para o ano inteiro, ao invés de 12!
-    saldos = []
-    meses = []
-    hoje = date.today()
+MESES_ABREV = {1: "Jan", 2: "Fev", 3: "Mar", 4: "Abr", 5: "Mai", 6: "Jun", 7: "Jul", 8: "Ago", 9: "Set", 10: "Out", 11: "Nov", 12: "Dez"}
 
-    saldo_base = calcular_saldo_ate(ano - 1, 12)
+def dados_entradas_saidas_por_periodo(data_inicio, data_fim):
+    
+    #Retorna entradas e saídas agrupadas por mês/ano para o período informado.
+    
+    resposta = executar_com_retry(lambda: supabase.table("transacao").select("valor, tipo, data").gte("data", data_inicio).lte("data", data_fim).execute())
 
-    inicio_ano = date(ano, 1, 1).isoformat()
-    fim_ano = date(ano, 12, 31).isoformat()
-    resposta = executar_com_retry( lambda: supabase.table("transacao").select("valor, tipo, data").gte("data", inicio_ano).lte("data", fim_ano).execute())
-    transacoes_ano = resposta.data
+    resultado = {}
 
-    saldo_acumulado = saldo_base
+    for t in resposta.data:
+        ano_mes = t["data"][:7]  # "YYYY-MM"  Pegando somente o ano e o mes nesse formato
+        
+        if ano_mes not in resultado: 
+            resultado[ano_mes] = {"entrada": 0, "saida": 0} #se o ano e o mes ainda nao estiverem no dicionario, eu adiciono, mas zerados
 
-    for mes in range(1,13):
-        if ano == hoje.year and mes > hoje.month: 
-            break
-            
-        ultimo_dia = calendar.monthrange(ano, mes)[1]
-        limite_mes_str = f"{ano:04d}-{mes:02d}-{ultimo_dia:02d}"
-        inicio_mes_str = f"{ano:04d}-{mes:02d}-01"
-
-        for t in transacoes_ano:
-            data_t = t["data"][:10]
-            if inicio_mes_str <= data_t <= limite_mes_str:
-                valor = abs(t["valor"])
-                if t["tipo"] == "ENTRADA":
-                    saldo_acumulado += valor
-                else:
-                    saldo_acumulado -= valor
-
-        saldos.append(saldo_acumulado)
-        meses.append(mes)
-
-    return meses, saldos
-
-
-def dados_despesas_por_categoria(ano, mes): 
-    primeiro_dia = date(ano, mes, 1).isoformat()
-    ultimo_dia = date(ano, mes, calendar.monthrange(ano, mes)[1]).isoformat()
-
-    resposta =executar_com_retry(lambda: supabase.table("transacao").select("valor, categoria(nome)").eq("tipo", "SAIDA").gte("data", primeiro_dia).lte("data", ultimo_dia).execute()) 
-
-    categorias = {} 
-    for t in resposta.data: 
-        if t.get("categoria"):
-            nome = t["categoria"]["nome"]
+        valor = abs(t["valor"])
+        
+        if t["tipo"] == "ENTRADA":
+            resultado[ano_mes]["entrada"] += valor
         else:
-            nome = "Sem categoria"
-        categorias[nome] = categorias.get(nome, 0) + abs(t["valor"]) 
+            resultado[ano_mes]["saida"] += valor
 
-    return categorias
+    # Ordena cronologicamente
+    chaves = sorted(resultado.keys())
+    labels = []
+    entradas = []
+    saidas = []
 
-def dados_despesas_por_categoria_ano(ano):
+    for chave in chaves:
+        ano, mes = chave.split("-") #divido o ano e o mes da chave
+        labels.append(f"{MESES_ABREV[int(mes)]}/{ano[2:]}")
+        entradas.append(resultado[chave]["entrada"])
+        saidas.append(resultado[chave]["saida"])
 
-    # Retorna o total de saídas agrupado por categoria para o ano inteiro.
+    return labels, entradas, saidas
 
-    inicio = date(ano, 1, 1).isoformat()
-    fim = date(ano, 12, 31).isoformat()
 
-    resposta = executar_com_retry(lambda: supabase.table("transacao").select("valor, categoria(nome)").eq("tipo", "SAIDA").gte("data", inicio).lte("data", fim).execute())
+def dados_despesas_por_categoria_periodo(data_inicio, data_fim):
+    
+    #Retorna despesas por categoria para o período informado.
+    
+    resposta = executar_com_retry(lambda: supabase.table("transacao").select("valor, categoria(nome)").eq("tipo", "SAIDA").gte("data", data_inicio).lte("data", data_fim).execute())
 
     categorias = {}
+
     for t in resposta.data:
         nome = t["categoria"]["nome"] if t.get("categoria") else "Sem categoria"
-        categorias[nome] = categorias.get(nome, 0) + abs(t["valor"])
+        categorias[nome] = categorias.get(nome, 0) + abs(t["valor"]) #pego o valor que esta armazenado em categoria e adiciono o novo que chegou, se nao tiver nenhum valor em categoria, adiciono zero
 
     return categorias
 
-def dados_entradas_saidas_por_mes(ano): 
-    inicio = date(ano, 1, 1).isoformat() 
-    fim = date(ano, 12, 31).isoformat() 
 
-    resposta = executar_com_retry(lambda: supabase.table("transacao").select("valor, tipo, data").gte("data", inicio).lte("data", fim).execute()) 
+def dados_evolucao_saldo_periodo(data_inicio, data_fim):
+    
+    #Retorna evolução do saldo mês a mês para o período informado.
+    
+    dt_inicio = datetime.strptime(data_inicio, "%Y-%m-%d").date()
+    dt_fim = datetime.strptime(data_fim, "%Y-%m-%d").date()
 
-    entradas = [0] * 12
-    saidas = [0] * 12
+    # Saldo acumulado até o mês anterior ao início
+    if dt_inicio.month == 1:
+        saldo_base = calcular_saldo_ate(dt_inicio.year - 1, 12)
+    else:
+        saldo_base = calcular_saldo_ate(dt_inicio.year, dt_inicio.month - 1)
 
-    for t in resposta.data:
-        mes = int(t["data"].split("-")[1]) - 1  
+    resposta = executar_com_retry(lambda: supabase.table("transacao").select("valor, tipo, data").gte("data", data_inicio).lte("data", data_fim).execute())
+    transacoes = resposta.data
+
+    # Agrupa por mês/ano
+    resultado = {}
+
+    for t in transacoes:
+        ano_mes = t["data"][:7]
+    
+        if ano_mes not in resultado:
+            resultado[ano_mes] = 0
+    
         valor = abs(t["valor"])
+    
         if t["tipo"] == "ENTRADA":
-            entradas[mes] += valor
+            resultado[ano_mes] += valor
         else:
-            saidas[mes] += valor
+            resultado[ano_mes] -= valor
 
-    return entradas, saidas
+    chaves = sorted(resultado.keys())
+    labels = []
+    saldos = []
+    saldo_acumulado = saldo_base
+
+    for chave in chaves:
+        saldo_acumulado += resultado[chave]
+        ano, mes = chave.split("-")
+        labels.append(f"{MESES_ABREV[int(mes)]}/{ano[2:]}")
+        saldos.append(saldo_acumulado)
+
+    return labels, saldos
+
+
