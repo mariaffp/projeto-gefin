@@ -101,20 +101,79 @@ def create_mobile_navbar(perfil="NORMAL", nome="Usuário"):
             )
         )
 
+    # botão "Mais" — abre o menu flutuante glass acima da navbar
     nav_items.append(
         html.Button(
             [
-                html.I(className="bi bi-box-arrow-right"),
-                html.Span("Sair", className="mobile-nav-label"),
+                html.I(className="bi bi-grid-fill"),
+                html.Span("Mais", className="mobile-nav-label"),
             ],
-            id="mobile-btn-logout",
-            className="mobile-nav-item mobile-nav-logout",
+            id="mobile-btn-mais",
+            className="mobile-nav-item mobile-nav-mais",
             n_clicks=0,
         )
     )
 
+    # itens do menu flutuante (Mais)
+    menu_items = []
+    if perfil in ["FINANCEIRO", "ADMIN"]:
+        menu_items.append(
+            dcc.Link(
+                [
+                    html.I(className="bi bi-journal-text"),
+                    html.Span("Logs do Sistema"),
+                ],
+                href="/logs",
+                className="mobile-menu-item",
+            )
+        )
+    if perfil == "ADMIN":
+        menu_items.append(
+            dcc.Link(
+                [
+                    html.I(className="bi bi-shield-lock-fill"),
+                    html.Span("Painel Admin"),
+                ],
+                href="/admin",
+                className="mobile-menu-item",
+            )
+        )
+
+    menu_items.append(
+        html.Button(
+            [
+                html.I(className="bi bi-box-arrow-right"),
+                html.Span("Sair"),
+            ],
+            id="mobile-btn-logout",
+            className="mobile-menu-item mobile-menu-logout",
+            n_clicks=0,
+        )
+    )
+
+    # backdrop invisível pra fechar ao clicar fora
+    backdrop = html.Div(
+        id="mobile-menu-backdrop",
+        className="mobile-menu-backdrop",
+        n_clicks=0,
+        style={"display": "none"},
+    )
+
+    # menu flutuante glass (acima da navbar)
+    menu = html.Div(
+        menu_items,
+        id="mobile-menu-flutuante",
+        className="mobile-menu-flutuante",
+        style={"display": "none"},
+    )
+
     return html.Nav(
-        [dcc.Location(id="mobile-logout-redirect", refresh=True), *nav_items],
+        [
+            dcc.Location(id="mobile-logout-redirect", refresh=True),
+            backdrop,
+            menu,
+            *nav_items,
+        ],
         className="mobile-bottom-nav",
         id="mobile-navbar",
     )
@@ -139,6 +198,35 @@ def fazer_logout(n_clicks):
     from supabase_client import supabase
     supabase.auth.sign_out()
     return "/"
+
+@callback(
+    Output("mobile-menu-flutuante", "style"),
+    Output("mobile-menu-backdrop", "style"),
+    Input("mobile-btn-mais", "n_clicks"),
+    Input("mobile-menu-backdrop", "n_clicks"),
+    State("mobile-menu-flutuante", "style"),
+    prevent_initial_call=True
+)
+def toggle_mobile_menu(n_mais, n_backdrop, style_atual):
+    import dash
+    ctx = dash.callback_context
+    if not ctx.triggered:
+        return dash.no_update, dash.no_update
+
+    triggered_id = ctx.triggered[0]["prop_id"].split(".")[0]
+    visivel = style_atual.get("display") == "flex" if style_atual else False
+
+    # clicou no backdrop -> fecha sempre
+    if triggered_id == "mobile-menu-backdrop":
+        return {"display": "none"}, {"display": "none"}
+
+    # clicou no botão Mais -> toggle
+    if triggered_id == "mobile-btn-mais":
+        if visivel:
+            return {"display": "none"}, {"display": "none"}
+        return {"display": "flex"}, {"display": "block"}
+
+    return dash.no_update, dash.no_update
 
 @callback(
     Output("mobile-logout-redirect", "href"),

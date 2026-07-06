@@ -47,9 +47,10 @@ def cadastrar_usuario(email, senha, nome, perfil, admin_id=None):
             "email_confirm": True
         })
 
-        supabase.table("usuario") \
-            .update({"nome": nome}) \
-            .eq("id", resposta.user.id) \
+        novo_id = resposta.user.id
+        supabase_admin.table("usuario") \
+            .update({"nome": nome, "perfil": perfil}) \
+            .eq("id", novo_id) \
             .execute()
 
         if perfil != 'NORMAL':

@@ -84,6 +84,7 @@ layout = html.Div(
     }
 )
 
+_PERFIL_ORDEM = ["ADMIN", "FINANCEIRO", "NORMAL"]
 
 @callback(
     Output("lista-usuarios", "children"),
@@ -195,8 +196,13 @@ def editar_perfil(n_clicks_lista, valores, ids_select):
 
 
 @callback(
+    Output("modal-confirm-delete", "is_open"),
+    Output("store-user-to-delete", "data"),
     Output("msg-erro-usuarios", "children", allow_duplicate=True),
     Input({"type": "btn-deletar-usuario", "index": dash.ALL}, "n_clicks"),
+    Input("btn-cancelar-delete", "n_clicks"),
+    Input("btn-confirmar-delete", "n_clicks"),
+    State("store-user-to-delete", "data"),
     prevent_initial_call=True
 )
 def deletar_usuario_callback(n_clicks_lista):
