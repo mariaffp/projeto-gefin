@@ -47,20 +47,14 @@ def cadastrar_usuario(email, senha, nome, perfil):
             "email_confirm": True
         })
 
-        supabase.table("usuario") \
-            .update({"nome": nome}) \
-            .eq("id", resposta.user.id) \
+        novo_id = resposta.user.id
+        supabase_admin.table("usuario") \
+            .update({"nome": nome, "perfil": perfil}) \
+            .eq("id", novo_id) \
             .execute()
 
-        if perfil != 'NORMAL':
-            supabase.table("usuario") \
-                .update({"perfil": perfil}) \
-                .eq("id", resposta.user.id) \
-                .execute()
-
-        # Usa o próprio id do usuário criado como referência no log
         registrar_log(
-            resposta.user.id,
+            novo_id,
             "USUARIO_CRIADO",
             f"Usuário '{nome}' ({email}) criado com perfil {perfil}"
         )
@@ -83,7 +77,6 @@ def atualizar_perfil_usuario(user_id, novo_perfil, admin_id=None):
 
         supabase_admin.table("usuario").update({"perfil": novo_perfil}).eq("id", user_id).execute()
 
-        # Se soubermos quem fez a alteração, registra no log
         id_para_log = admin_id if admin_id else user_id
         registrar_log(
             id_para_log,
@@ -99,14 +92,14 @@ def atualizar_perfil_usuario(user_id, novo_perfil, admin_id=None):
 
 def deletar_usuario(user_id):
     try:
-        # Busca o nome antes de deletar
         usuario = buscar_usuario(user_id)
         nome = usuario["nome"] if usuario else user_id
 
-        # Registra o log ANTES de deletar
         registrar_log(user_id, "USUARIO_DELETADO", f"Usuário '{nome}' deletado")
 
-        
+        # Ordem: logs -> tabela usuario -> auth.users (FKs em cascata reversa)
+        supabase_admin.table("log_sistema").delete().eq("id_usuario", user_id).execute()
+        supabase_admin.table("usuario").delete().eq("id", user_id).execute()
         supabase_admin.auth.admin.delete_user(user_id)
         return True
     except Exception as e:

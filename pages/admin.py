@@ -7,45 +7,46 @@ dash.register_page(__name__, path='/admin')
 COR_BOTAO = "#0067EC"
 COR_TEXTO_BRANCO = "#FFFFFF"
 
-layout = html.Div(
-    [
-        html.Div(
-            style={
-                "position": "fixed",
-                "top": 0, "left": 0,
-                "width": "100vw", "height": "100vh",
-                "background": "linear-gradient(to bottom right, rgba(109, 237, 255, 0.6), rgba(171, 195, 255, 0.6)), url('/assets/focusbackground.png')",
-                "backgroundSize": "cover",
-                "backgroundPosition": "center",
-                "filter": "blur(5px)",
-                "transform": "scale(1.1)",
-                "zIndex": -1,
-            }
-        ),
-        html.Div(
-            [
-                html.H2("Painel Admin", className="text-center mb-4", style={"color": COR_BOTAO, "fontWeight": "bold"}),
-                dcc.Link(
-                    dbc.Button("Cadastrar usuário", className="w-100 mb-3 py-3",
-                               style={"backgroundColor": COR_BOTAO, "borderColor": COR_BOTAO, "color": COR_TEXTO_BRANCO, "fontSize": "1.1rem"}),
-                    href="/admin/cadastro"
-                ),
-                dcc.Link(
-                    dbc.Button("Gerenciar usuários", className="w-100 py-3",
-                               style={"backgroundColor": COR_BOTAO, "borderColor": COR_BOTAO, "color": COR_TEXTO_BRANCO, "fontSize": "1.1rem"}),
-                    href="/admin/usuarios"
-                ),
-            ],
-            className="glass-box p-5",
-            style={
-                "backgroundColor": "rgba(228, 228, 228, 0.5)",
-                "borderRadius": "12px",
-                "boxShadow": "0px 15px 35px rgba(0, 0, 0, 0.5)",
-                "width": "100%", "maxWidth": "400px",
-                "margin": "0 auto",
-                "position": "relative", "zIndex": 2
-            }
-        )
-    ],
-    style={"minHeight": "calc(100vh - 90px)", "display": "flex", "alignItems": "center", "justifyContent": "center"}
-)
+layout = dbc.Container([
+    html.H2("Painel Admin", className="fw-normal text-dark my-4"),
+
+    dbc.Row([
+        dbc.Col([
+            dcc.Link(
+                dbc.Card([
+                    dbc.CardBody([
+                        html.Div(
+                            html.I(className="bi bi-person-plus-fill",
+                                   style={"fontSize": "2rem", "color": COR_BOTAO}),
+                            className="mb-3",
+                        ),
+                        html.H5("Cadastrar usuário", className="fw-bold mb-2"),
+                        html.P("Crie uma nova conta para acessar o sistema.",
+                               className="text-muted small mb-0"),
+                    ]),
+                ], className="shadow-sm h-100 admin-card"),
+                href="/admin/cadastro",
+                style={"textDecoration": "none", "color": "inherit"},
+            ),
+        ], xs=12, md=6, className="mb-3"),
+
+        dbc.Col([
+            dcc.Link(
+                dbc.Card([
+                    dbc.CardBody([
+                        html.Div(
+                            html.I(className="bi bi-people-fill",
+                                   style={"fontSize": "2rem", "color": COR_BOTAO}),
+                            className="mb-3",
+                        ),
+                        html.H5("Gerenciar usuários", className="fw-bold mb-2"),
+                        html.P("Altere perfis e remova usuários cadastrados.",
+                               className="text-muted small mb-0"),
+                    ]),
+                ], className="shadow-sm h-100 admin-card"),
+                href="/admin/usuarios",
+                style={"textDecoration": "none", "color": "inherit"},
+            ),
+        ], xs=12, md=6, className="mb-3"),
+    ]),
+], fluid=True, className="py-2")

@@ -1,42 +1,145 @@
 import dash
-from dash import html, Input, Output, callback
+from dash import html, Input, Output, callback, dcc, State, ctx
 import dash_bootstrap_components as dbc
-from services.usuario import listar_usuarios, atualizar_perfil_usuario, deletar_usuario, buscar_perfil
+from services.usuario import listar_usuarios, atualizar_perfil_usuario, deletar_usuario
 
 dash.register_page(__name__, path='/admin/usuarios')
 
 COR_BOTAO = "#0067EC"
 
-layout = html.Div(
-    [
-        html.Div(
-            style={
-                "position": "fixed", "top": 0, "left": 0,
-                "width": "100vw", "height": "100vh",
-                "background": "linear-gradient(to bottom right, rgba(109, 237, 255, 0.6), rgba(171, 195, 255, 0.6)), url('/assets/focusbackground.png')",
-                "backgroundSize": "cover", "backgroundPosition": "center",
-                "filter": "blur(5px)", "transform": "scale(1.1)", "zIndex": -1,
-            }
-        ),
-        html.Div(
-            [
-                html.H2("Gerenciar Usuários", className="text-center mb-3", style={"color": COR_BOTAO, "fontWeight": "bold"}),
-                html.Div(id="msg-erro-usuarios", className="text-danger text-center mb-2"),
-                html.Div(id="lista-usuarios")
-            ],
-            className="glass-box p-4",
-            style={
-                "backgroundColor": "rgba(228, 228, 228, 0.5)",
-                "borderRadius": "12px",
-                "boxShadow": "0px 15px 35px rgba(0, 0, 0, 0.5)",
-                "width": "100%", "maxWidth": "450px",
-                "maxHeight": "75vh", "overflowY": "auto",
-                "margin": "0 auto", "position": "relative", "zIndex": 2
-            }
-        )
-    ],
-    style={"minHeight": "calc(100vh - 90px)", "display": "flex", "alignItems": "center", "justifyContent": "center"}
-)
+_PERFIL_INFO = {
+    "ADMIN":      {"label": "Administradores", "cor": "#dc3545"},
+    "FINANCEIRO": {"label": "Financeiro",      "cor": "#0067EC"},
+    "NORMAL":     {"label": "Normal",          "cor": "#6c757d"},
+}
+
+_PERFIL_ORDEM = ["ADMIN", "FINANCEIRO", "NORMAL"]
+
+
+def _iniciais(nome):
+    partes = (nome or "?").strip().split()
+    if len(partes) >= 2:
+        return (partes[0][0] + partes[1][0]).upper()
+    return (partes[0][:2] if partes else "?").upper()
+
+
+def _avatar(nome, perfil):
+    cor = _PERFIL_INFO.get(perfil, _PERFIL_INFO["NORMAL"])["cor"]
+    return html.Div(
+        _iniciais(nome),
+        className="user-avatar",
+        style={"backgroundColor": cor},
+    )
+
+
+def _badge_perfil(perfil):
+    cor = _PERFIL_INFO.get(perfil, _PERFIL_INFO["NORMAL"])["cor"]
+    return dbc.Badge(perfil, className="ms-2", style={
+        "backgroundColor": cor,
+        "fontSize": "0.65rem",
+        "fontWeight": "600",
+        "letterSpacing": "0.03em",
+    })
+
+
+def _linha_usuario(u):
+    return html.Div(
+        [
+            _avatar(u["nome"], u["perfil"]),
+            html.Div(
+                [
+                    html.Div([
+                        html.Span(u["nome"], className="fw-semibold"),
+                        _badge_perfil(u["perfil"]),
+                    ], className="d-flex align-items-center flex-wrap"),
+                    html.Small(u["email"] if "email" in u else "",
+                               className="text-muted"),
+                ],
+                className="flex-grow-1",
+                style={"minWidth": "0"},
+            ),
+            html.Div(
+                [
+                    dbc.Select(
+                        id={"type": "select-perfil", "index": u["id"]},
+                        options=[
+                            {"label": "Normal", "value": "NORMAL"},
+                            {"label": "Financeiro", "value": "FINANCEIRO"},
+                            {"label": "Admin", "value": "ADMIN"},
+                        ],
+                        value=u["perfil"],
+                        className="select-perfil-usuario",
+                    ),
+                    dbc.Button(
+                        html.I(className="bi bi-trash"),
+                        id={"type": "btn-deletar-usuario", "index": u["id"]},
+                        color="danger",
+                        size="sm",
+                        outline=True,
+                        className="btn-deletar-usuario",
+                    ),
+                ],
+                className="d-flex align-items-center gap-2 user-acoes",
+            ),
+        ],
+        className="user-linha",
+    )
+
+
+def _grupo_perfil(perfil, usuarios):
+    if not usuarios:
+        return None
+    info = _PERFIL_INFO[perfil]
+    return html.Div([
+        html.Div([
+            html.H6(info["label"], className="mb-0 fw-bold",
+                    style={"color": info["cor"]}),
+            dbc.Badge(len(usuarios), color="secondary", className="ms-2",
+                      style={"fontSize": "0.7rem"}),
+        ], className="d-flex align-items-center mb-3"),
+        html.Hr(className="mb-3",
+                style={"borderColor": info["cor"], "opacity": "0.3"}),
+        html.Div([_linha_usuario(u) for u in usuarios], className="mb-4"),
+    ])
+
+
+layout = dbc.Container([
+    dcc.Location(id="url", refresh=False),
+    dcc.Store(id="store-user-to-delete"),
+
+    dbc.Row([
+        dbc.Col([
+            dcc.Link(
+                dbc.Button(
+                    [html.I(className="bi bi-arrow-left me-2"), "Voltar ao painel"],
+                    color="secondary", outline=True, size="sm",
+                ),
+                href="/admin",
+                style={"textDecoration": "none"},
+            ),
+        ], width=12, className="mb-3"),
+    ]),
+
+    html.H2("Gerenciar Usuários", className="fw-normal text-dark mb-4"),
+
+    html.Div(id="msg-erro-usuarios", className="mb-3"),
+
+    dbc.Card([
+        dbc.CardBody([
+            html.Div(id="lista-usuarios"),
+        ]),
+    ], className="shadow-sm"),
+
+    dbc.Modal([
+        dbc.ModalHeader(dbc.ModalTitle("Confirmar exclusão")),
+        dbc.ModalBody("Tem certeza que deseja remover este usuário? Esta ação não pode ser desfeita."),
+        dbc.ModalFooter([
+            dbc.Button("Cancelar", id="btn-cancelar-delete", color="secondary", outline=True, className="me-2"),
+            dbc.Button("Confirmar exclusão", id="btn-confirmar-delete", color="danger"),
+        ]),
+    ], id="modal-confirm-delete", is_open=False, centered=True),
+
+], fluid=True, className="py-2")
 
 
 @callback(
@@ -49,33 +152,24 @@ def atualizar_lista_usuarios(pathname, msg):
         return dash.no_update
 
     usuarios = listar_usuarios()
-    linhas = []
+    if not usuarios:
+        return html.P("Nenhum usuário cadastrado.", className="text-muted text-center py-4")
+
+    por_perfil = {p: [] for p in _PERFIL_ORDEM}
     for u in usuarios:
-        linhas.append(
-            html.Div(
-                [
-                    html.Span(u["nome"], style={"fontWeight": "600", "flex": "1"}),
-                    dbc.Select(
-                        id={"type": "select-perfil", "index": u["id"]},
-                        options=[
-                            {"label": "Normal", "value": "NORMAL"},
-                            {"label": "Financeiro", "value": "FINANCEIRO"},
-                            {"label": "Admin", "value": "ADMIN"},
-                        ],
-                        value=u["perfil"],
-                        style={"width": "130px", "marginRight": "8px"}
-                    ),
-                    dbc.Button(
-                        html.I(className="bi bi-trash"),
-                        id={"type": "btn-deletar-usuario", "index": u["id"]},
-                        color="danger", size="sm"
-                    )
-                ],
-                className="d-flex align-items-center mb-2",
-                style={"gap": "6px"}
-            )
-        )
-    return linhas
+        perfil = u.get("perfil", "NORMAL")
+        por_perfil.setdefault(perfil, []).append(u)
+        for p in _PERFIL_ORDEM:
+            por_perfil.setdefault(p, [])
+
+    grupos = []
+    for perfil in _PERFIL_ORDEM:
+        lista = sorted(por_perfil.get(perfil, []), key=lambda x: (x.get("nome") or "").lower())
+        g = _grupo_perfil(perfil, lista)
+        if g:
+            grupos.append(g)
+
+    return grupos
 
 
 @callback(
@@ -84,30 +178,46 @@ def atualizar_lista_usuarios(pathname, msg):
     prevent_initial_call=True
 )
 def editar_perfil(valores):
-    ctx = dash.callback_context
     if not ctx.triggered:
         return dash.no_update
 
     id_disparado = ctx.triggered_id["index"]
     novo_valor = ctx.triggered[0]["value"]
 
-    perfil_atual = buscar_perfil(id_disparado)
-    if novo_valor == perfil_atual:
+    if not novo_valor:
         return dash.no_update
 
     sucesso = atualizar_perfil_usuario(id_disparado, novo_valor)
-    return "Perfil atualizado!" if sucesso else "Erro ao atualizar perfil."
+    return dash.no_update if sucesso else "Erro ao atualizar perfil."
 
 
 @callback(
+    Output("modal-confirm-delete", "is_open"),
+    Output("store-user-to-delete", "data"),
     Output("msg-erro-usuarios", "children", allow_duplicate=True),
     Input({"type": "btn-deletar-usuario", "index": dash.ALL}, "n_clicks"),
+    Input("btn-cancelar-delete", "n_clicks"),
+    Input("btn-confirmar-delete", "n_clicks"),
+    State("store-user-to-delete", "data"),
     prevent_initial_call=True
 )
-def deletar_usuario_callback(n_clicks_lista):
-    ctx = dash.callback_context
-    if not ctx.triggered or not any(n_clicks_lista):
-        return dash.no_update
-    id_disparado = ctx.triggered_id["index"]
-    sucesso = deletar_usuario(id_disparado)
-    return "Usuário removido!" if sucesso else "Erro ao remover usuário."
+def gerenciar_modal_delete(clicks_trash, click_cancel, click_confirm, user_id_atual):
+    triggered = ctx.triggered_id
+    triggered_value = ctx.triggered[0]["value"] if ctx.triggered else None
+
+    if isinstance(triggered, dict) and triggered.get("type") == "btn-deletar-usuario":
+        if triggered_value and triggered_value > 0:
+            return True, triggered["index"], dash.no_update
+        return dash.no_update, dash.no_update, dash.no_update
+
+    if triggered == "btn-cancelar-delete":
+        return False, None, dash.no_update
+
+    if triggered == "btn-confirmar-delete":
+        if user_id_atual:
+            sucesso = deletar_usuario(user_id_atual)
+            msg = "Usuário removido!" if sucesso else "Erro ao remover usuário."
+            return False, None, msg
+        return False, None, dash.no_update
+
+    return dash.no_update, dash.no_update, dash.no_update
