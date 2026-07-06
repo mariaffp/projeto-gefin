@@ -51,7 +51,7 @@ def verificar_autenticacao(pathname, search):
     usuario = buscar_usuario(session.user.id)
     nome = usuario["nome"] if usuario else "Usuário"
     perfil = usuario["perfil"] if usuario else buscar_perfil(session.user.id)
-    paginas_financeiro = ["/transacoes", "/importacao"]
+    paginas_financeiro = ["/transacoes", "/importacao", "/logs"]
     
     if pathname in paginas_financeiro and not eh_financeiro(perfil):
         return dcc.Location(href="/dashboard", id="redirecionar-perfil", refresh=True), create_navbar(perfil), create_mobile_navbar(perfil)

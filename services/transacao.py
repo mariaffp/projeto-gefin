@@ -96,7 +96,9 @@ def editar_transacao(id_transacao, dados, user_id):
     if not eh_financeiro(perfil):
         raise Exception("Usuário sem permissão para editar transação")
 
-    buscar_transacao(id_transacao, user_id)
+    transacao_antiga = buscar_transacao(id_transacao, user_id)
+    descricao_antiga = transacao_antiga.get("descricao", "")
+    descricao_nova = dados.get("descricao", descricao_antiga)
 
     resultado = (
         supabase.table("transacao")
@@ -106,7 +108,11 @@ def editar_transacao(id_transacao, dados, user_id):
         .execute()
     )
 
-    registrar_log(user_id, "TRANSACAO_EDITADA", f"Transação '{id_transacao}' editada")
+    registrar_log(
+        user_id,
+        "TRANSACAO_EDITADA",
+        f"Transação '{descricao_antiga}' editada"
+    )
 
     return resultado
 
@@ -117,7 +123,8 @@ def excluir_transacao(id_transacao, user_id):
     if not eh_financeiro(perfil):
         raise Exception("Usuário sem permissão para excluir transação")
 
-    buscar_transacao(id_transacao, user_id)
+    transacao = buscar_transacao(id_transacao, user_id)
+    descricao = transacao.get("descricao", "")
 
     resultado = (
         supabase.table("transacao")
@@ -126,8 +133,12 @@ def excluir_transacao(id_transacao, user_id):
         .eq("id_usuario", user_id)
         .execute()
     )
-    
-    registrar_log(user_id, "TRANSACAO_DELETADA", f"Transação '{id_transacao}' deletada")
+
+    registrar_log(
+        user_id,
+        "TRANSACAO_DELETADA",
+        f"Transação '{descricao}' deletada"
+    )
 
     return resultado
 

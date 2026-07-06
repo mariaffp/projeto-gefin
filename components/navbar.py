@@ -14,7 +14,9 @@ def create_navbar(perfil="NORMAL", nome="Usuário"):
         nav_links.extend([
             dbc.NavItem(dbc.NavLink("Transações", href="/transacoes", active="exact", className="glass-nav-link px-3")),
             dbc.NavItem(dbc.NavLink("Importação", href="/importacao", active="exact", className="glass-nav-link px-3")),
+            dbc.NavItem(dbc.NavLink("Logs do Sistema", href="/logs", active="exact", className="glass-nav-link px-3")),
         ])
+
     if perfil == "ADMIN":
         nav_links.append(
             dbc.NavItem(dbc.NavLink("Admin", href="/admin", active="exact", className="glass-nav-link px-3"))

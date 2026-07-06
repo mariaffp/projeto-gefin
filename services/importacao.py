@@ -8,6 +8,7 @@ from services.conta import criar_conta
 from services.forma_pagamento import criar_forma_pagamento
 from services.transacao import verificar_duplicatas, salvar_transacoes_importadas
 from zoneinfo import ZoneInfo
+from services.log import registrar_log
 
 
 COLUNAS_CORA = {
@@ -418,7 +419,13 @@ def ler_csv(caminho_arquivo, user_id, confirmar_duplicatas=False, nome_arquivo_o
         user_id=user_id
     )
 
-    registrar_log(user_id, "IMPORTACAO_EXTRATO", f"Arquivo '{nome_arquivo}' importado com {len(transacoes)} transações")
+    nome_arquivo = nome_arquivo_original or os.path.basename(caminho_arquivo)
+
+    registrar_log(
+        user_id,
+        "IMPORTACAO_EXTRATO",
+        f"Arquivo '{nome_arquivo}' importado com {len(transacoes)} transações"
+    )
 
 
     return {
