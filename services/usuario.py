@@ -53,12 +53,6 @@ def cadastrar_usuario(email, senha, nome, perfil, admin_id=None):
             .eq("id", novo_id) \
             .execute()
 
-        if perfil != 'NORMAL':
-            supabase.table("usuario") \
-                .update({"perfil": perfil}) \
-                .eq("id", resposta.user.id) \
-                .execute()
-
         id_para_log = admin_id if admin_id else resposta.user.id
 
         registrar_log(
@@ -130,6 +124,9 @@ def deletar_usuario(user_id, admin_id=None):
             f"Usuário '{nome}' deletado"
         )
 
+        # Ordem: logs -> tabela usuario -> auth.users (FKs em cascata reversa)
+        supabase_admin.table("log_sistema").delete().eq("id_usuario", user_id).execute()
+        supabase_admin.table("usuario").delete().eq("id", user_id).execute()
         supabase_admin.auth.admin.delete_user(user_id)
         return True
 
