@@ -9,6 +9,8 @@ from services.forma_pagamento import criar_forma_pagamento
 from services.transacao import verificar_duplicatas, salvar_transacoes_importadas
 from zoneinfo import ZoneInfo
 from services.log import registrar_log
+from services.utils import executar_com_retry
+
 
 
 COLUNAS_CORA = {
@@ -351,7 +353,7 @@ def listar_importacoes(user_id):
     if not eh_financeiro(perfil):
         raise Exception("Usuário sem permissão para listar importações")
 
-    return (
+    return executar_com_retry( lambda:
         supabase.table("importacao")
         .select("*")
         .order("data_importacao", desc=True)
@@ -365,7 +367,7 @@ def buscar_importacao(id_importacao, user_id):
     if not eh_financeiro(perfil):
         raise Exception("Usuário sem permissão para buscar importação")
 
-    importacao = (
+    importacao = executar_com_retry( lambda:
         supabase.table("importacao")
         .select("*")
         .eq("id_importacao", id_importacao)

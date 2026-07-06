@@ -2,6 +2,7 @@ from services.usuario import buscar_perfil, eh_financeiro
 from supabase_client import supabase
 from datetime import datetime, timezone
 from services.log import registrar_log
+from services.utils import executar_com_retry
 
 
 def normalizar_nome(nome):
@@ -104,18 +105,13 @@ def editar_categoria(id_cat, nome, user_id):
 
 
 def listar_categorias():
-    return (
-        supabase.table("categoria")
-        .select("*")
-        .is_("deletado", None)
-        .order("nome")
-        .execute()
-    )
+    resultado = executar_com_retry( lambda: supabase.table("categoria").select("*").is_("deletado", None).order("nome").execute())
+    return resultado
 
 
 def listar_categorias_desativadas(user_id):
     validar_financeiro(user_id)
-    return (
+    return executar_com_retry( lambda:
         supabase.table("categoria")
         .select("*")
         .not_.is_("deletado", None)
@@ -126,7 +122,7 @@ def listar_categorias_desativadas(user_id):
 
 def listar_todas_categorias(user_id):
     validar_financeiro(user_id)
-    return (
+    return executar_com_retry ( lambda:
         supabase.table("categoria")
         .select("*")
         .order("nome")

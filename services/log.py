@@ -1,4 +1,5 @@
 from supabase_client import supabase
+from services.utils import executar_com_retry
 
 
 def registrar_log(id_usuario, acao, descricao=None):
@@ -21,7 +22,7 @@ def listar_logs(user_id, limite=100):
     if not eh_financeiro(perfil):
         raise Exception("Usuário sem permissão para visualizar logs")
 
-    resposta = (
+    resposta = executar_com_retry( lambda:
         supabase.table("log_sistema")
         .select("*, usuario(nome)")
         .order("created_at", desc=True)

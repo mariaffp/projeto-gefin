@@ -72,7 +72,7 @@ def cadastrar_usuario(email, senha, nome, perfil):
 
 
 def listar_usuarios():
-    registro = supabase_admin.table("usuario").select("id, nome, perfil").order("nome").execute()
+    registro = executar_com_retry( lambda: supabase_admin.table("usuario").select("id, nome, perfil").order("nome").execute())
     return registro.data if registro.data else []
 
 
