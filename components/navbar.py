@@ -46,7 +46,7 @@ def create_navbar(perfil="NORMAL", nome="Usuário"):
                         # perfil e botao de sair
                         html.Div(
                             [
-                                html.Span(f"{nome}", className="glass-nav-text mx-3"),
+                                dbc.NavLink(nome,href="/perfil",active="exact",className="glass-nav-link px-3"),
                                 dbc.Button("Sair", id="btn-logout", color="primary", size="sm", outline=True, className="glass-btn"),
                                 dcc.Location(id="logout-redirect", refresh=True)
                             ],

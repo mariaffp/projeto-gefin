@@ -24,6 +24,13 @@ ESTILO_LABEL = {
     "marginBottom": "6px"
 }
 
+def obter_user_id_logado():
+    session = supabase.auth.get_session()
+
+    if session is None:
+        raise Exception("Usuário não autenticado")
+
+    return session.user.id
 
 layout = html.Div(
     [
@@ -204,7 +211,15 @@ def callback_cadastrar_usuario(n_clicks, nome, email, senha, perfil):
 )
 
     try:
-        sucesso = cadastrar_usuario(email, senha, nome, perfil)
+        admin_id = obter_user_id_logado()
+
+        sucesso = cadastrar_usuario(
+        email,
+        senha,
+        nome,
+        perfil,
+        admin_id=admin_id
+        )
         if sucesso:
             return (
                 "Usuário cadastrado com sucesso!",
