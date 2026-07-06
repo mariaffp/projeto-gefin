@@ -5,12 +5,9 @@ A plataforma permite a importação de extratos bancários(CSV) com estruturas d
 
  Tecnologias utilizadas:
  - Python
- - Flask
- - PostgreSQL
  - Supabase
  - Dash
  - Plotly
- - HTML, CSS e Javascript
  - Pandas
 
  Equipe:
@@ -18,6 +15,5 @@ A plataforma permite a importação de extratos bancários(CSV) com estruturas d
  - Maria Fernanda (https://github.com/mariaffp)
  - João Rocha (https://github.com/Jovigabriel)
  - Leonardo Valladão (https://github.com/Leo-dk574)
- - Samuel de Moraes (https://github.com/MiIsaarks)
  
 
