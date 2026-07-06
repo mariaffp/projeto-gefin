@@ -1,6 +1,7 @@
 import dash
 from dash import html, Input, Output, callback, dcc
 import dash_bootstrap_components as dbc
+from supabase_client import supabase
 from services.usuario import cadastrar_usuario
 
 dash.register_page(__name__, path='/admin/cadastro')
@@ -8,13 +9,16 @@ dash.register_page(__name__, path='/admin/cadastro')
 COR_BOTAO = "#0067EC"
 COR_TEXTO_BRANCO = "#FFFFFF"
 
+
 def obter_user_id_logado():
     session = supabase.auth.get_session()
-
     if session is None:
         raise Exception("Usuário não autenticado")
-
     return session.user.id
+
+
+layout = dbc.Container([
+    dcc.Location(id="redirecionar-admin", refresh=True),
 
     dbc.Row([
         dbc.Col([
@@ -129,15 +133,7 @@ def callback_cadastrar_usuario(n_clicks, nome, email, senha, perfil):
         )
 
     try:
-        admin_id = obter_user_id_logado()
-
-        sucesso = cadastrar_usuario(
-        email,
-        senha,
-        nome,
-        perfil,
-        admin_id=admin_id
-        )
+        sucesso = cadastrar_usuario(email, senha, nome, perfil)
         if sucesso:
             return (
                 "Usuário cadastrado com sucesso!",
