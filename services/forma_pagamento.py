@@ -1,6 +1,7 @@
 from services.usuario import buscar_perfil, eh_financeiro
 from services.log import registrar_log
 from supabase_client import supabase
+from services.utils import executar_com_retry
 
 
 def criar_forma_pagamento(nome, user_id):
@@ -59,4 +60,4 @@ def listar_forma_pagamento(user_id):
     if not eh_financeiro(perfil):
         raise Exception("Usuario sem permissão para listar Forma de pagamento")
 
-    return supabase.table("forma_pagamento").select("*").execute()
+    return executar_com_retry(lambda: supabase.table("forma_pagamento").select("*").execute())

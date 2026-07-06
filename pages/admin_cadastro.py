@@ -8,8 +8,13 @@ dash.register_page(__name__, path='/admin/cadastro')
 COR_BOTAO = "#0067EC"
 COR_TEXTO_BRANCO = "#FFFFFF"
 
-layout = dbc.Container([
-    dcc.Location(id="redirecionar-admin", refresh=True),
+def obter_user_id_logado():
+    session = supabase.auth.get_session()
+
+    if session is None:
+        raise Exception("Usuário não autenticado")
+
+    return session.user.id
 
     dbc.Row([
         dbc.Col([
@@ -124,7 +129,15 @@ def callback_cadastrar_usuario(n_clicks, nome, email, senha, perfil):
         )
 
     try:
-        sucesso = cadastrar_usuario(email, senha, nome, perfil)
+        admin_id = obter_user_id_logado()
+
+        sucesso = cadastrar_usuario(
+        email,
+        senha,
+        nome,
+        perfil,
+        admin_id=admin_id
+        )
         if sucesso:
             return (
                 "Usuário cadastrado com sucesso!",

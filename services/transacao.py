@@ -1,7 +1,7 @@
 from supabase_client import supabase 
 from services.usuario import buscar_perfil, eh_financeiro
 from services.log import registrar_log
-
+from services.utils import executar_com_retry
 
 
 def verificar_duplicatas(transacoes, user_id):
@@ -61,7 +61,7 @@ def listar_transacoes(user_id):
     if not eh_financeiro(perfil):
         raise Exception("Usuário sem permissão para listar transações")
 
-    return (
+    return executar_com_retry( lambda:
         supabase.table("transacao")
         .select("*")
         .eq("id_usuario", user_id)
@@ -76,7 +76,7 @@ def buscar_transacao(id_transacao, user_id):
     if not eh_financeiro(perfil):
         raise Exception("Usuário sem permissão para buscar transação")
 
-    transacao = (
+    transacao = executar_com_retry (lambda:
         supabase.table("transacao")
         .select("*")
         .eq("id_transacao", id_transacao)
@@ -165,7 +165,7 @@ def listar_transacoes_por_importacao(id_importacao, user_id):
     if not eh_financeiro(perfil):
         raise Exception("Usuário sem permissão para listar transações da importação")
 
-    return (
+    return executar_com_retry( lambda:
         supabase.table("transacao")
         .select("*")
         .eq("id_importacao", id_importacao)
@@ -195,6 +195,6 @@ def listar_transacoes_relatorio(id_categoria=None, tipo=None, periodo=None, id_c
     if data_fim:
         query = query.lte("data", data_fim)
 
-    resposta = query.order("data", desc=True).execute()
+    resposta = executar_com_retry( lambda: query.order("data", desc=True).execute())
     return resposta.data
 

@@ -1,6 +1,7 @@
 from services.usuario import buscar_perfil, eh_financeiro
 from services.log import registrar_log
 from supabase_client import supabase
+from services.utils import executar_com_retry
 
 
 def criar_conta(nome, user_id):
@@ -54,4 +55,6 @@ def deletar_conta(user_id, id_conta):
 
 
 def listar_contas():
-    return supabase.table("conta").select("*").execute()
+    return executar_com_retry(lambda: supabase.table("conta").select("*").execute())
+
+    
