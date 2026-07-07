@@ -102,13 +102,13 @@ dbc.Row([
                                     },
                                 ),
                                 
-                            ], className="d-flex flex-wrap gap-2 justify-content-end") # Botões na direita!
+                            ], className="d-flex flex-wrap gap-2 justify-content-end") 
                         ], width=12),
                     ]),
                 ]),
             ], className="shadow-sm"),
         ], md=10, lg=8),
-    ], className="justify-content-center"), # Centraliza apenas a linha do Card
+    ], className="justify-content-center"), 
 ], fluid=True, className="py-2")
 
 
