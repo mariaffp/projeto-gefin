@@ -4,10 +4,10 @@ import dash_bootstrap_components as dbc
 from dash.exceptions import PreventUpdate
 from supabase_client import supabase
 from services.categoria import listar_categorias
-from services.conta import listar_contas
 from services.forma_pagamento import listar_forma_pagamento
 from services.transacao import listar_transacoes, criar_transacao, editar_transacao, excluir_transacao
 from services.categoria import *
+from services.conta import *
 
 dash.register_page(__name__, path='/transacoes', name='Transações')
 
@@ -370,6 +370,52 @@ modal_categorias = dbc.Modal([
     ])
 ], id="modal-categorias", is_open=False, size="lg")
 
+
+modal_contas = dbc.Modal([
+    dbc.ModalHeader(dbc.ModalTitle("Gerenciar Contas")),
+
+    dbc.ModalBody([
+        html.Div(id="msg-conta", className="mb-3"),
+
+        dbc.Row([
+            dbc.Col([
+                dbc.Label("Nome da conta"),
+                dbc.Input(
+                    id="input-nome-conta",
+                    placeholder="Ex: Nubank, Cora, Banco do Brasil"
+                )
+            ], md=8),
+
+            dbc.Col([
+                dbc.Label("Filtro"),
+                dbc.Select(
+                    id="filtro-status-conta",
+                    options=[
+                        {"label": "Ativas", "value": "ativas"},
+                        {"label": "Desativadas", "value": "desativadas"},
+                    ],
+                    value="ativas"
+                )
+            ], md=4),
+        ], className="mb-3"),
+
+        dbc.Button(
+            "Criar Conta",
+            id="btn-criar-conta",
+            color="primary",
+            className="mb-3"
+        ),
+
+        dcc.Store(id="store-conta-editando"),
+
+        html.Div(id="lista-contas")
+    ]),
+
+    dbc.ModalFooter([
+        dbc.Button("Fechar", id="btn-fechar-contas", color="secondary")
+    ])
+], id="modal-contas", is_open=False, size="lg")
+
 # layout
 
 layout = dbc.Container([
@@ -383,6 +429,7 @@ layout = dbc.Container([
 
     transacao_modal,
     modal_categorias,
+    modal_contas,
 
     dbc.Row(
         dbc.Col(html.H2("Gerenciamento de Transações", className="text-dark mt-4 mb-4 ml-4 fw-bold"), width="auto"),
@@ -424,12 +471,9 @@ layout = dbc.Container([
             dbc.Button("Nova Transação", id="btn-nova-transacao", color="success", className="mb-2 me-sm-2 shadow-sm fw-bold"),
             dbc.Button("Editar Selecionada", id="btn-editar", color="warning", className="mb-2 me-sm-2 text-white shadow-sm fw-bold"),
             dbc.Button("Excluir Selecionadas", id="btn-excluir", color="danger", className="mb-2 me-sm-2 shadow-sm fw-bold"),
-            dbc.Button(
-            "Gerenciar Categorias",
-            id="btn-gerenciar-categorias",
-            color="primary",
-            className="mb-2 shadow-sm fw-bold"
-            ),
+           dbc.Button("Gerenciar Categorias",id="btn-gerenciar-categorias",color="primary",className="mb-2 me-sm-2 shadow-sm fw-bold"),
+
+            dbc.Button("Gerenciar Contas",id="btn-gerenciar-contas",color="info",className="mb-2 shadow-sm fw-bold"),
         ], width=12, className="mb-3 d-flex justify-content-start flex-wrap")
     ]),
 
@@ -1301,3 +1345,239 @@ def excluir_transacoes_selecionadas(n_clicks, check_values, check_ids):
             print(f"Erro ao excluir transação {id_transacao}: {e}")
 
     return listar_transacoes(user_id).data
+
+def renderizar_lista_contas(contas, status):
+    if not contas:
+        return dbc.Alert("Nenhuma conta encontrada.", color="secondary")
+
+    itens = []
+
+    for conta in contas:
+        nome = conta["nome"]
+        id_conta = conta["id_conta"]
+
+        if status == "ativas":
+            botoes = [
+                dbc.Button(
+                    "Editar",
+                    id={"type": "btn-editar-conta", "index": id_conta},
+                    color="warning",
+                    size="sm",
+                    className="me-2 text-white"
+                ),
+                dbc.Button(
+                    "Desativar",
+                    id={"type": "btn-desativar-conta", "index": id_conta},
+                    color="danger",
+                    size="sm"
+                )
+            ]
+        else:
+            botoes = [
+                dbc.Button(
+                    "Reativar",
+                    id={"type": "btn-reativar-conta", "index": id_conta},
+                    color="success",
+                    size="sm"
+                )
+            ]
+
+        itens.append(
+            dbc.ListGroupItem([
+                html.Div([
+                    html.Strong(nome),
+                    html.Div(botoes)
+                ], className="d-flex justify-content-between align-items-center")
+            ])
+        )
+
+    return dbc.ListGroup(itens, flush=True)
+
+@callback(
+    Output("modal-contas", "is_open"),
+    Output("msg-conta", "children", allow_duplicate=True),
+    Input("btn-gerenciar-contas", "n_clicks"),
+    Input("btn-fechar-contas", "n_clicks"),
+    State("modal-contas", "is_open"),
+    prevent_initial_call=True
+)
+
+def abrir_fechar_modal_contas(n_abrir, n_fechar, is_open):
+    return not is_open, ""
+
+
+@callback(
+    Output("lista-contas", "children"),
+    Input("modal-contas", "is_open"),
+    Input("filtro-status-conta", "value"),
+    Input("store-contas", "data")
+)
+def carregar_lista_contas_modal(is_open, status, _):
+    if not is_open:
+        raise PreventUpdate
+
+    user_id = obter_user_id_logado()
+    todas = listar_todas_contas(user_id).data
+
+    if status == "desativadas":
+        contas = [c for c in todas if c.get("deletado") is not None]
+    else:
+        contas = [c for c in todas if c.get("deletado") is None]
+
+    return renderizar_lista_contas(contas, status)
+
+@callback(
+    Output("input-nome-conta", "value"),
+    Output("store-conta-editando", "data"),
+    Output("btn-criar-conta", "children"),
+    Output("msg-conta", "children", allow_duplicate=True),
+    Input({"type": "btn-editar-conta", "index": ALL}, "n_clicks"),
+    State({"type": "btn-editar-conta", "index": ALL}, "id"),
+    State("store-contas", "data"),
+    prevent_initial_call=True
+)
+
+def preparar_edicao_conta(n_clicks, ids_editar, contas):
+    triggered = ctx.triggered_id
+
+    if not triggered:
+        raise PreventUpdate
+
+    index = next(
+        (i for i, item in enumerate(ids_editar or []) if item["index"] == triggered["index"]),
+        None
+    )
+
+    if index is None or not n_clicks[index]:
+        raise PreventUpdate
+
+    id_conta = triggered["index"]
+
+    conta = next(
+        (c for c in (contas or []) if c["id_conta"] == id_conta),
+        None
+    )
+
+    if not conta:
+        raise PreventUpdate
+
+    return conta["nome"], id_conta, "Salvar Alteração", ""
+
+
+@callback(
+    Output("msg-conta", "children", allow_duplicate=True),
+    Output("store-contas", "data", allow_duplicate=True),
+    Output("input-nome-conta", "value", allow_duplicate=True),
+    Output("store-conta-editando", "data", allow_duplicate=True),
+    Output("btn-criar-conta", "children", allow_duplicate=True),
+    Input("btn-criar-conta", "n_clicks"),
+    State("input-nome-conta", "value"),
+    State("store-conta-editando", "data"),
+    prevent_initial_call=True
+)
+
+def salvar_conta_modal(n_clicks, nome, conta_editando):
+    if not nome:
+        return (
+            dbc.Alert("Informe o nome da conta.", color="warning"),
+            dash.no_update,
+            dash.no_update,
+            dash.no_update,
+            dash.no_update
+        )
+
+    user_id = obter_user_id_logado()
+
+    try:
+        if conta_editando:
+            editar_conta(user_id, nome, conta_editando)
+            mensagem = "Conta editada com sucesso."
+        else:
+            criar_conta(nome, user_id)
+            mensagem = "Conta criada com sucesso."
+
+        contas = listar_contas().data
+
+        return (
+            dbc.Alert(mensagem, color="success"),
+            contas,
+            "",
+            None,
+            "Criar Conta"
+        )
+
+    except Exception as e:
+        return (
+            dbc.Alert(str(e), color="danger"),
+            dash.no_update,
+            dash.no_update,
+            dash.no_update,
+            dash.no_update
+        )
+
+
+@callback(
+    Output("msg-conta", "children", allow_duplicate=True),
+    Output("store-contas", "data", allow_duplicate=True),
+    Output("input-nome-conta", "value", allow_duplicate=True),
+    Output("store-conta-editando", "data", allow_duplicate=True),
+    Output("btn-criar-conta", "children", allow_duplicate=True),
+    Input({"type": "btn-desativar-conta", "index": ALL}, "n_clicks"),
+    Input({"type": "btn-reativar-conta", "index": ALL}, "n_clicks"),
+    State({"type": "btn-desativar-conta", "index": ALL}, "id"),
+    State({"type": "btn-reativar-conta", "index": ALL}, "id"),
+    prevent_initial_call=True
+)
+def alterar_status_conta(n_desativar, n_reativar, ids_desativar, ids_reativar):
+    triggered = ctx.triggered_id
+
+    if not triggered:
+        raise PreventUpdate
+
+    if triggered["type"] == "btn-desativar-conta":
+        index = next(
+            (i for i, item in enumerate(ids_desativar or []) if item["index"] == triggered["index"]),
+            None
+        )
+
+        if index is None or not n_desativar[index]:
+            raise PreventUpdate
+
+    if triggered["type"] == "btn-reativar-conta":
+        index = next(
+            (i for i, item in enumerate(ids_reativar or []) if item["index"] == triggered["index"]),
+            None
+        )
+
+        if index is None or not n_reativar[index]:
+            raise PreventUpdate
+
+    user_id = obter_user_id_logado()
+    id_conta = triggered["index"]
+
+    try:
+        if triggered["type"] == "btn-desativar-conta":
+            deletar_conta(user_id, id_conta)
+            mensagem = "Conta desativada com sucesso."
+        else:
+            reativar_conta(id_conta, user_id)
+            mensagem = "Conta reativada com sucesso."
+
+        contas = listar_contas().data
+
+        return (
+            dbc.Alert(mensagem, color="success"),
+            contas,
+            "",
+            None,
+            "Criar Conta"
+        )
+
+    except Exception as e:
+        return (
+            dbc.Alert(str(e), color="danger"),
+            dash.no_update,
+            dash.no_update,
+            dash.no_update,
+            dash.no_update
+        )
