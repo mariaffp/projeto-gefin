@@ -90,6 +90,7 @@ def _grupo_perfil(perfil, usuarios):
 layout = dbc.Container([
     dcc.Location(id="url-admin-usuarios", refresh=False),
     dcc.Store(id="store-user-to-delete"),
+    dcc.Store(id="store-perfis-iniciais"),
 
     dbc.Row([
         dbc.Col([
@@ -128,6 +129,7 @@ layout = dbc.Container([
 
 @callback(
     Output("lista-usuarios", "children"),
+    Output("store-perfis-iniciais", "data"),
     Input("url-admin-usuarios", "pathname"),
     Input("msg-erro-usuarios", "children"),
 )
@@ -137,7 +139,9 @@ def atualizar_lista_usuarios(pathname, msg):
 
     usuarios = listar_usuarios()
     if not usuarios:
-        return html.P("Nenhum usuário cadastrado.", className="text-muted text-center py-4")
+        return html.P("Nenhum usuário cadastrado.", className="text-muted text-center py-4"), {}
+
+    perfis_iniciais = {u["id"]: u.get("perfil", "NORMAL") for u in usuarios}
 
     por_perfil = {p: [] for p in _PERFIL_ORDEM}
     for u in usuarios:
@@ -151,15 +155,16 @@ def atualizar_lista_usuarios(pathname, msg):
         if g:
             grupos.append(g)
 
-    return grupos
+    return grupos, perfis_iniciais
 
 
 @callback(
     Output("msg-erro-usuarios", "children", allow_duplicate=True),
     Input({"type": "select-perfil", "index": dash.ALL}, "value"),
+    State("store-perfis-iniciais", "data"),
     prevent_initial_call=True,
 )
-def editar_perfil(valores):
+def editar_perfil(valores, perfis_iniciais):
     if not ctx.triggered:
         return dash.no_update
 
@@ -169,10 +174,14 @@ def editar_perfil(valores):
     if not novo_valor:
         return dash.no_update
 
+    perfis_iniciais = perfis_iniciais or {}
+    if perfis_iniciais.get(id_disparado) == novo_valor:
+        return dash.no_update
+
     try:
         admin_id = _obter_user_id_logado()
         sucesso = atualizar_perfil_usuario(id_disparado, novo_valor, admin_id=admin_id)
-        return "Perfil atualizado!" if sucesso else "Erro ao atualizar perfil."
+        return dash.no_update if sucesso else "Erro ao atualizar perfil."
     except Exception as e:
         print("ERRO ao editar perfil:", e)
         return f"Erro: {e}"
