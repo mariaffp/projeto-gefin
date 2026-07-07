@@ -182,6 +182,23 @@ def layout(**kwargs):
             className="mb-4"
         ),
 
+
+        html.Hr(style={
+            "borderTop": "1px solid #E2E8F0", 
+            "opacity": "0.6", 
+            "marginTop": "45px", 
+            "marginBottom": "35px"
+        }),
+
+        dbc.Row([
+            dbc.Col(
+                html.H3(" Dashboards - Análise Histórica por Período",
+                        id="subtitulo-dashboard", className="fw-semibold text-dark mb-0",
+                        style={"fontSize": "26px"}), 
+                width="auto"
+            ),
+        ], className="mb-4"),
+
        
         dbc.Row([
             dbc.Col([
