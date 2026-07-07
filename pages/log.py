@@ -3,7 +3,7 @@ from dash import html, dcc, Input, Output, callback
 import dash_bootstrap_components as dbc
 from datetime import datetime
 from zoneinfo import ZoneInfo
-from supabase_client import supabase
+from supabase_client import supabase, get_supabase_client_com_sessao
 from services.log import listar_logs
 
 
@@ -11,7 +11,9 @@ dash.register_page(__name__, path="/logs", name="Logs")
 
 
 def obter_user_id_logado():
-    session = supabase.auth.get_session()
+    #session = supabase.auth.get_session()
+    client = get_supabase_client_com_sessao()
+    session = client.auth.get_session()
 
     if session is None:
         raise Exception("Usuário não autenticado")

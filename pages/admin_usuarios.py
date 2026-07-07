@@ -3,7 +3,7 @@ from dash import html, Input, Output, callback, dcc, State, ctx
 import dash_bootstrap_components as dbc
 from dash.exceptions import PreventUpdate
 from services.usuario import listar_usuarios, atualizar_perfil_usuario, deletar_usuario
-from supabase_client import supabase
+from supabase_client import supabase, get_supabase_client_com_sessao
 
 dash.register_page(__name__, path="/admin/usuarios")
 
@@ -18,7 +18,9 @@ _PERFIL_ORDEM = ["ADMIN", "FINANCEIRO", "NORMAL"]
 
 
 def _obter_user_id_logado():
-    session = supabase.auth.get_session()
+    #session = supabase.auth.get_session()
+    client = get_supabase_client_com_sessao()
+    session = client.auth.get_session()
     if session is None:
         raise Exception("Usuário não autenticado")
     return session.user.id

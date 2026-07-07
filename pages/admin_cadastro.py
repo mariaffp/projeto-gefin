@@ -1,7 +1,7 @@
 import dash
 from dash import html, Input, Output, callback, dcc
 import dash_bootstrap_components as dbc
-from supabase_client import supabase
+from supabase_client import supabase, get_supabase_client_com_sessao
 from services.usuario import cadastrar_usuario
 
 dash.register_page(__name__, path='/admin/cadastro')
@@ -11,7 +11,9 @@ COR_TEXTO_BRANCO = "#FFFFFF"
 
 
 def obter_user_id_logado():
-    session = supabase.auth.get_session()
+    #session = supabase.auth.get_session()
+    client = get_supabase_client_com_sessao()
+    session = client.auth.get_session()
     if session is None:
         raise Exception("Usuário não autenticado")
     return session.user.id

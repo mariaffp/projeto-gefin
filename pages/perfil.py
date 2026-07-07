@@ -1,7 +1,7 @@
 import dash
 from dash import html, dcc, Input, Output, State, callback
 import dash_bootstrap_components as dbc
-from supabase_client import supabase
+from supabase_client import supabase, get_supabase_client_com_sessao
 from services.usuario import buscar_usuario
 
 
@@ -9,7 +9,9 @@ dash.register_page(__name__, path="/perfil", name="Meu Perfil")
 
 
 def obter_user_logado():
-    session = supabase.auth.get_session()
+    #session = supabase.auth.get_session()
+    client = get_supabase_client_com_sessao()
+    session = client.auth.get_session()
 
     if session is None:
         raise Exception("Usuário não autenticado")
@@ -134,7 +136,8 @@ def alterar_senha(n_clicks, nova_senha, confirmar_senha):
         )
 
     try:
-        supabase.auth.update_user({
+        client = get_supabase_client_com_sessao()
+        client.auth.update_user({
             "password": nova_senha
         })
 

@@ -1,33 +1,51 @@
-from supabase_client import supabase, supabase_admin
+from supabase_client import supabase_admin, get_supabase_client_com_sessao
 from services.log import registrar_log
 from services.utils import executar_com_retry
 
 def buscar_usuario(user_id):
+    #def buscar_usuario(user_id):
+    print("===================")
+    print("BUSCAR USUARIO")
+    print("ID RECEBIDO:", user_id)
+    print("===================")
     try:
+        client = get_supabase_client_com_sessao()
         registro = executar_com_retry(
-            lambda: supabase.table("usuario")
+            lambda: client.table("usuario")
                 .select("nome, perfil")
                 .eq("id", user_id)
                 .single()
                 .execute()
         )
+        print("RETORNOU:", registro.data)
         return registro.data if registro.data else None
     except Exception as e:
-        print(f"ERRO no buscar_usuario: {e}")
+        #print(f"ERRO no buscar_usuario: {e}")
+        print("ERRO COM ID:", user_id)
+        print(e)
         return None
 
 def buscar_perfil(user_id):
+    #def buscar_perfil(user_id):
+    print("===================")
+    print("BUSCAR PERFIL")
+    print("BUSCAR_PERFIL:", user_id)
+    print("===================")
     try:
+        client = get_supabase_client_com_sessao()
         registro = executar_com_retry(
-            lambda: supabase.table("usuario")
+            lambda: client.table("usuario")
                 .select("perfil")
                 .eq("id", user_id)
                 .single()
                 .execute()
         )
+        print("RETORNOU:", registro.data['perfil'] if registro.data else None)
         return registro.data['perfil'] if registro.data else None
     except Exception as e:
-        print(f"ERRO no buscar_perfil: {e}")
+        #print(f"ERRO no buscar_perfil: {e}")
+        print("ERRO COM ID:", user_id)
+        print(e)
         return None
 
 def eh_admin(perfil):
@@ -69,7 +87,7 @@ def cadastrar_usuario(email, senha, nome, perfil, admin_id=None):
 
 
 def listar_usuarios():
-    registro = executar_com_retry( lambda: supabase_admin.table("usuario").select("id, nome, perfil").order("nome").execute())
+    registro = executar_com_retry( lambda: client.table("usuario").select("id, nome, perfil").order("nome").execute())
     return registro.data if registro.data else []
 
 

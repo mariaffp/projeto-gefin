@@ -1,5 +1,6 @@
 import dash_bootstrap_components as dbc
 from dash import html, Input, Output, State, callback, dcc
+from flask import session as flask_session
 
 # Baseado nesse modelo https://www.dash-bootstrap-components.com/docs/components/navbar/
 
@@ -195,8 +196,10 @@ def toggle_navbar_collapse(n, is_open):
     prevent_initial_call=True
 )
 def fazer_logout(n_clicks):
-    from supabase_client import supabase
-    supabase.auth.sign_out()
+    from supabase_client import get_supabase_client_com_sessao
+    client = get_supabase_client_com_sessao()
+    client.auth.sign_out()
+    flask_session.clear()
     return "/"
 
 @callback(
@@ -234,6 +237,8 @@ def toggle_mobile_menu(n_mais, n_backdrop, style_atual):
     prevent_initial_call=True
 )
 def fazer_logout_mobile(n_clicks):
-    from supabase_client import supabase
-    supabase.auth.sign_out()
+    from supabase_client import get_supabase_client_com_sessao
+    client = get_supabase_client_com_sessao()
+    client.auth.sign_out()
+    flask_session.clear()
     return "/"

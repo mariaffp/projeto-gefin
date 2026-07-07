@@ -2,7 +2,7 @@ import dash
 from dash import html, dcc, Input, Output, State, callback, MATCH, ALL, ctx
 import dash_bootstrap_components as dbc
 from dash.exceptions import PreventUpdate
-from supabase_client import supabase
+from supabase_client import supabase, get_supabase_client_com_sessao
 from services.categoria import listar_categorias
 from services.conta import listar_contas
 from services.forma_pagamento import listar_forma_pagamento
@@ -12,7 +12,9 @@ from services.categoria import *
 dash.register_page(__name__, path='/transacoes', name='Transações')
 
 def obter_user_id_logado():
-    session = supabase.auth.get_session()
+    #session = supabase.auth.get_session()
+    client = get_supabase_client_com_sessao()
+    session = client.auth.get_session()
 
     if session is None:
         raise Exception("Usuário não autenticado")

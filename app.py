@@ -6,13 +6,15 @@ load_dotenv(Path(__file__).resolve().parent / ".env")
 from dash import Dash, html, dcc, Input, Output, callback
 import dash
 import dash_bootstrap_components as dbc
-from supabase_client import supabase
+from supabase_client import supabase, get_supabase_client_com_sessao
 from components.navbar import create_navbar, create_mobile_navbar
 from services.usuario import buscar_perfil, eh_financeiro, buscar_usuario, eh_admin
 from flask import request, redirect
 
 app = Dash(__name__, use_pages= True, external_stylesheets=[dbc.themes.ZEPHYR, "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"], suppress_callback_exceptions=True) # tema zephyr
 server = app.server
+
+server.secret_key = os.getenv("FLASK_SECRET_KEY", "troque-essa-chave-depois")
 
 @server.before_request
 def checar_permissao_antes_de_carregar():
@@ -26,7 +28,11 @@ def checar_permissao_antes_de_carregar():
     if pathname.startswith("/_dash") or pathname.startswith("/assets"):
         return None
 
-    session = supabase.auth.get_session()
+    #session = supabase.auth.get_session()
+    client = get_supabase_client_com_sessao()
+    session = client.auth.get_session()
+
+
     if session is None:
         return redirect("/")  # bloqueia AQUI, antes do Dash processar
 
@@ -73,7 +79,8 @@ def verificar_autenticacao(pathname, search):
     if pathname in paginas_publicas:
         return "", "", ""
     
-    session = supabase.auth.get_session()
+    client = get_supabase_client_com_sessao()
+    session = client.auth.get_session()
     if session is None:
         return dcc.Location(href="/", id="redirecionar-auth", refresh=True), "", ""
 
@@ -114,4 +121,4 @@ if __name__ == "__main__":
     print(f" desktop:  http://localhost:{port}")
     print(f" celular: http://{lan_ip}:{port}")
 
-    app.run(debug=True, host="0.0.0.0", port=port)
+    app.run(debug=False, host="0.0.0.0", port=port)
