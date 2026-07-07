@@ -115,7 +115,17 @@ def create_mobile_navbar(perfil="NORMAL", nome="Usuário"):
     )
 
     # itens do menu flutuante (Mais)
-    menu_items = []
+    menu_items = [
+        dcc.Link(
+        [
+            html.I(className="bi bi-person-circle"),
+            html.Span("Perfil"),
+        ],
+        href="/perfil",
+        className="mobile-menu-item",
+    )
+]
+
     if perfil in ["FINANCEIRO", "ADMIN"]:
         menu_items.append(
             dcc.Link(
