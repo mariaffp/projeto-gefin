@@ -14,6 +14,8 @@ charset-normalizer==3.4.5
 colorama==0.4.6
 comm==0.2.3
 confluent-kafka==2.3.0
+dash==4.4.0
+dash-bootstrap-components==2.0.4
 debugpy==1.8.20
 decorator==5.2.1
 defusedxml==0.7.1
@@ -79,11 +81,13 @@ pymongo==4.10.1
 PyMySQL==1.1.1
 pyspark==3.5.0
 python-dateutil==2.9.0.post0
+python-dotenv==1.2.2
 python-json-logger==4.0.0
 pytz==2025.2
 PyYAML==6.0.3
 pyzmq==27.1.0
 referencing==0.37.0
+reportlab==5.0.0
 requests==2.32.5
 rfc3339-validator==0.1.4
 rfc3986-validator==0.1.1
@@ -96,6 +100,9 @@ setuptools==80.9.0
 six==1.17.0
 soupsieve==2.8.3
 stack-data==0.6.3
+supabase==2.31.0
+supabase-auth==2.31.0
+supabase-functions==2.31.0
 terminado==0.18.1
 threadpoolctl==3.6.0
 tinycss2==1.4.0
@@ -112,10 +119,4 @@ webencodings==0.5.1
 websocket-client==1.9.0
 wheel==0.45.1
 widgetsnbextension==4.0.15
-dash==4.4.0
-dash-bootstrap-components==2.0.4
-python-dotenv==1.2.2
-reportlab==5.0.0
-supabase==2.31.0
-supabase-auth==2.31.0
-supabase-functions==2.31.0
+
