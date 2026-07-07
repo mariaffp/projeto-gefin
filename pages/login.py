@@ -6,8 +6,9 @@ from pathlib import Path
 from dotenv import load_dotenv
 from flask import request
 from urllib.parse import parse_qs
-from supabase_client import supabase
 from services.usuario import buscar_perfil, eh_financeiro
+from flask import session as flask_session
+from supabase_client import supabase, criar_client_oauth
 
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
@@ -171,7 +172,9 @@ def login_email(n_clicks, email, senha):
         return "",dash.no_update
     try: #tenta enviar as credenciais pro supabase autenticar
         resposta = supabase.auth.sign_in_with_password({"email": email, "password": senha})
-       
+        flask_session["access_token"] = resposta.session.access_token
+        flask_session["refresh_token"] = resposta.session.refresh_token
+
         #buscando perfil do usuario
         user_id = resposta.user.id
         perfil = buscar_perfil(user_id)
@@ -192,8 +195,9 @@ def login_google(n_clicks):
         return dash.no_update
 
     try: #solicita ao supabase o inicio do fluxo oauth com o google
+        client_oauth = criar_client_oauth()
         redirect_url = os.getenv("APP_URL", f"http://{request.host}")
-        response = supabase.auth.sign_in_with_oauth(
+        response = client_oauth.auth.sign_in_with_oauth(
             {"provider": "google",
             "options":{"redirect_to": redirect_url}}
         )
@@ -214,9 +218,12 @@ def redirecionar_apos_google(search):
             # Extrai o code da URL
             code = search.split("code=")[1].split("&")[0]
             
+            client_oauth = criar_client_oauth()
             # Troca o code pela sessão
-            resposta = supabase.auth.exchange_code_for_session({"auth_code": code})
-            
+            resposta = client_oauth.auth.exchange_code_for_session({"auth_code": code})
+            flask_session["access_token"] = resposta.session.access_token
+            flask_session["refresh_token"] = resposta.session.refresh_token
+
             # Busca o perfil e redireciona
             user_id = resposta.user.id
             perfil = buscar_perfil(user_id)
