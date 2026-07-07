@@ -108,8 +108,10 @@ if __name__ == "__main__":
         s.close()
     except Exception:
         lan_ip = "SEU_IP_LOCAL"
+    
+    port = int(os.environ.get("PORT", 8050))
 
-    print(f" desktop:  http://localhost:8050")
-    print(f" celular: http://{lan_ip}:8050")
+    print(f" desktop:  http://localhost:{port}")
+    print(f" celular: http://{lan_ip}:{port}")
 
-    app.run(debug=True, host="0.0.0.0", port=8050)
+    app.run(debug=True, host="0.0.0.0", port=port)
