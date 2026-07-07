@@ -9,9 +9,38 @@ import dash_bootstrap_components as dbc
 from supabase_client import supabase
 from components.navbar import create_navbar, create_mobile_navbar
 from services.usuario import buscar_perfil, eh_financeiro, buscar_usuario, eh_admin
+from flask import request, redirect
 
 app = Dash(__name__, use_pages= True, external_stylesheets=[dbc.themes.ZEPHYR, "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"], suppress_callback_exceptions=True) # tema zephyr
 server = app.server
+
+@server.before_request
+def checar_permissao_antes_de_carregar():
+    pathname = request.path  # pega a URL que está sendo acessada, ex: "/admin"
+
+    paginas_publicas = ["/", "/login"]
+    if pathname in paginas_publicas:
+        return None  # deixa passar normal, sem checagem
+
+    # Ignora chamadas internas do Dash (assets, callbacks, etc) - não são "páginas" de verdade
+    if pathname.startswith("/_dash") or pathname.startswith("/assets"):
+        return None
+
+    session = supabase.auth.get_session()
+    if session is None:
+        return redirect("/")  # bloqueia AQUI, antes do Dash processar
+
+    usuario = buscar_usuario(session.user.id)
+    perfil = usuario["perfil"] if usuario else buscar_perfil(session.user.id)
+
+    paginas_financeiro = ["/transacoes", "/importacao"]
+    if pathname in paginas_financeiro and not eh_financeiro(perfil):
+        return redirect("/dashboard")
+
+    if pathname.startswith("/admin") and not eh_admin(perfil):
+        return redirect("/dashboard")
+
+    return None  # tudo certo, deixa passar
 
 app.layout = html.Div([
     dcc.Location(id="url", refresh=False),
@@ -81,5 +110,6 @@ if __name__ == "__main__":
         lan_ip = "SEU_IP_LOCAL"
 
     print(f" desktop:  http://localhost:8050")
+    print(f" celular: http://{lan_ip}:8050")
 
     app.run(debug=True, host="0.0.0.0", port=8050)
