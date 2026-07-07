@@ -192,7 +192,7 @@ def login_google(n_clicks):
         return dash.no_update
 
     try: #solicita ao supabase o inicio do fluxo oauth com o google
-        redirect_url = f"http://{request.host}"
+        redirect_url = os.getenv("APP_URL", f"http://{request.host}")
         response = supabase.auth.sign_in_with_oauth(
             {"provider": "google",
             "options":{"redirect_to": redirect_url}}
