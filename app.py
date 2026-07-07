@@ -13,6 +13,7 @@ from flask import request, redirect
 
 app = Dash(__name__, use_pages= True, external_stylesheets=[dbc.themes.ZEPHYR, "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"], suppress_callback_exceptions=True) # tema zephyr
 server = app.server
+server.secret_key = os.getenv("FLASK_SECRET_KEY", "troque-essa-chave-depois")
 
 @server.before_request
 def checar_permissao_antes_de_carregar():
