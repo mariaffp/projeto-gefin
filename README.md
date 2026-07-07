@@ -26,6 +26,18 @@ Instalação
 6. Acesse no navegador: http://localhost:8050
 7. Para acesso no Mobile, seguir o mesmo padrão mas com o IP da sua rede(estará no terminal)
 
+ ## Features
+ - Gerenciamento de usuários.
+ - Níveis entre perfis de acesso.
+ - Login com Google.
+ - Edição de Perfil.
+ - Importação de extratos em .csv.
+ - Exportação de Relatórios em .pdf ou .csv.
+ - Criação de Transações automáticas com base na importação.
+ - Criação de Transações manuais.
+ - Verificação de duplicatas.
+ - Dashboard Interativo.
+ - Verificação de Logs do Sistema.
 
 ## Segurança e Controle de Acesso
 
