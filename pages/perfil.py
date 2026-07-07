@@ -18,7 +18,7 @@ def obter_user_logado():
 
 
 layout = dbc.Container([
-    html.H2("Meu Perfil", className="mt-4 mb-4"),
+    html.H2("Meu Perfil", className="text-dark mt-4 mb-4 ml-4 fw-bold"),
 
     dbc.Card([
         dbc.CardHeader("Dados da Conta", className="fw-bold"),

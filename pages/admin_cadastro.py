@@ -19,11 +19,15 @@ def obter_user_id_logado():
 
 layout = dbc.Container([
     dcc.Location(id="redirecionar-admin", refresh=True),
-
-    dbc.Row([
+dbc.Row([
         dbc.Col([
-            html.H2("Cadastrar Usuário", className="fw-normal text-dark my-4"),
+            html.H2("Cadastrar Usuário", className="text-dark mt-4 mb-4 ml-4 fw-bold"),
+        ], width=12) 
+    ]),
 
+    
+dbc.Row([
+        dbc.Col([
             dbc.Card([
                 dbc.CardBody([
                     html.P("Crie uma nova conta para acessar o sistema.",
@@ -80,6 +84,13 @@ layout = dbc.Container([
                     dbc.Row([
                         dbc.Col([
                             html.Div([
+
+                                dcc.Link(
+                                    dbc.Button("Voltar", color="secondary", outline=True),
+                                    href="/admin",
+                                    style={"textDecoration": "none"},
+                                ),
+
                                 dbc.Button(
                                     "Cadastrar",
                                     id="btn-cadastrar",
@@ -90,18 +101,14 @@ layout = dbc.Container([
                                         "borderColor": COR_BOTAO,
                                     },
                                 ),
-                                dcc.Link(
-                                    dbc.Button("Voltar", color="secondary", outline=True),
-                                    href="/admin",
-                                    style={"textDecoration": "none"},
-                                ),
-                            ], className="d-flex flex-wrap gap-2")
+                                
+                            ], className="d-flex flex-wrap gap-2 justify-content-end") # Botões na direita!
                         ], width=12),
                     ]),
                 ]),
             ], className="shadow-sm"),
         ], md=10, lg=8),
-    ]),
+    ], className="justify-content-center"), # Centraliza apenas a linha do Card
 ], fluid=True, className="py-2")
 
 

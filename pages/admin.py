@@ -8,7 +8,7 @@ COR_BOTAO = "#0067EC"
 COR_TEXTO_BRANCO = "#FFFFFF"
 
 layout = dbc.Container([
-    html.H2("Painel Admin", className="fw-normal text-dark my-4"),
+    html.H2("Painel Admin", className="text-dark mt-4 mb-4 ml-4 fw-bold"),
 
     dbc.Row([
         dbc.Col([

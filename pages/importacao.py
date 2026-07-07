@@ -24,7 +24,7 @@ def obter_user_id_logado():
 layout = dbc.Container([
     dcc.Store(id="arquivo-pendente-store"),
 
-    html.H2("Importação de Extratos", className="mt-4 mb-4"),
+    html.H2("Importação de Extratos", className="text-dark mt-4 mb-4 ml-4 fw-bold"),
 
     dbc.Card([
         dbc.CardBody([

@@ -385,7 +385,7 @@ layout = dbc.Container([
     modal_categorias,
 
     dbc.Row(
-        dbc.Col(html.H2("Gerenciamento de Transações", className="fw-normal text-dark"), width="auto"),
+        dbc.Col(html.H2("Gerenciamento de Transações", className="text-dark mt-4 mb-4 ml-4 fw-bold"), width="auto"),
         className="my-4 align-items-center"
     ),
 

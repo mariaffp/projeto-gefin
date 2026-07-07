@@ -104,7 +104,7 @@ layout = dbc.Container([
         ], width=12, className="mb-3"),
     ]),
 
-    html.H2("Gerenciar Usuários", className="fw-normal text-dark mb-4"),
+    html.H2("Gerenciar Usuários", className="text-dark mt-4 mb-4 ml-4 fw-bold"),
 
     html.Div(id="msg-erro-usuarios", className="mb-3"),
 

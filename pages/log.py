@@ -83,7 +83,7 @@ def cor_acao(acao):
 
 
 layout = dbc.Container([
-    html.H2("Logs do Sistema", className="mt-4 mb-4"),
+    html.H2("Logs do Sistema", className="text-dark mt-4 mb-4 ml-4 fw-bold"),
 
     dbc.Card([
         dbc.CardBody([
