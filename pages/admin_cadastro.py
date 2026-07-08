@@ -73,7 +73,7 @@ dbc.Row([
                             dbc.Input(
                                 id="input-senha",
                                 type="password",
-                                placeholder="Digite a senha escolhida",
+                                placeholder="Digite a senha escolhida, se não for por google",
                                 className="mb-3",
                             ),
                         ], md=6),
@@ -92,8 +92,8 @@ dbc.Row([
                                 ),
 
                                 dbc.Button(
-                                    "Cadastrar",
-                                    id="btn-cadastrar",
+                                    "Cadastrar com senha",
+                                    id="btn-cadastrar-senha",
                                     color="primary",
                                     className="me-2",
                                     style={
@@ -101,7 +101,13 @@ dbc.Row([
                                         "borderColor": COR_BOTAO,
                                     },
                                 ),
-                                
+                                dbc.Button(
+                                    "Cadastrar via google",
+                                    id="btn-cadastrar-google",
+                                    color="success",
+                                    outline=True,
+                                    className="me-2",
+                                ),
                             ], className="d-flex flex-wrap gap-2 justify-content-end") 
                         ], width=12),
                     ]),
@@ -119,7 +125,8 @@ dbc.Row([
     Output("input-email", "value"),
     Output("input-senha", "value"),
     Output("input-perfil", "value"),
-    Input("btn-cadastrar", "n_clicks"),
+    Input("btn-cadastrar-senha", "n_clicks"),
+
     [
         dash.dependencies.State("input-nome", "value"),
         dash.dependencies.State("input-email", "value"),
@@ -141,6 +148,63 @@ def callback_cadastrar_usuario(n_clicks, nome, email, senha, perfil):
 
     try:
         sucesso = cadastrar_usuario(email, senha, nome, perfil)
+        if sucesso:
+            return (
+                "Usuário cadastrado com sucesso!",
+                dash.no_update,
+                "",
+                "",
+                "",
+                "NORMAL"
+            )
+        else:
+            return (
+                "Erro ao cadastrar usuário.",
+                dash.no_update,
+                dash.no_update,
+                dash.no_update,
+                dash.no_update,
+                dash.no_update
+            )
+    except Exception as e:
+        return (
+            f"Erro ao cadastrar usuário: {str(e)}",
+            dash.no_update,
+            dash.no_update,
+            dash.no_update,
+            dash.no_update,
+            dash.no_update
+        )
+
+@callback(
+    Output("msg-erro-admin", "children", allow_duplicate=True),
+    Output("redirecionar-admin", "href", allow_duplicate=True),
+    Output("input-nome", "value", allow_duplicate=True),
+    Output("input-email", "value", allow_duplicate=True),
+    Output("input-senha", "value", allow_duplicate=True),
+    Output("input-perfil", "value", allow_duplicate=True),
+    Input("btn-cadastrar-google", "n_clicks"),
+    [
+        dash.dependencies.State("input-nome", "value"),
+        dash.dependencies.State("input-email", "value"),
+        dash.dependencies.State("input-senha", "value"),
+        dash.dependencies.State("input-perfil", "value"),
+    ],
+    prevent_initial_call=True,
+)
+def callback_cadastrar_google(n_clicks, nome, email, senha, perfil):
+    if not all([nome, email, perfil]):
+        return (
+            "Preencha todos os campos (exceto senha).",
+            dash.no_update,
+            dash.no_update,
+            dash.no_update,
+            dash.no_update,
+            dash.no_update
+        )
+
+    try:
+        sucesso = cadastrar_usuario(email, None, nome, perfil)
         if sucesso:
             return (
                 "Usuário cadastrado com sucesso!",

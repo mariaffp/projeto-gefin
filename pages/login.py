@@ -6,7 +6,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from flask import request
 from urllib.parse import parse_qs
-from services.usuario import buscar_perfil, eh_financeiro
+from services.usuario import buscar_perfil, eh_financeiro, buscar_usuario
 from flask import session as flask_session
 from supabase_client import supabase, criar_client_oauth
 
@@ -226,6 +226,10 @@ def redirecionar_apos_google(search):
 
             # Busca o perfil e redireciona
             user_id = resposta.user.id
+            usuario = buscar_usuario(user_id)
+            if usuario is None or not usuario.get("aprovado"):
+                flask_session.clear()
+                return "/" + "Não autorizado!"
             perfil = buscar_perfil(user_id)
             return "/dashboard"
 

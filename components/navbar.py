@@ -207,8 +207,12 @@ def toggle_navbar_collapse(n, is_open):
 )
 def fazer_logout(n_clicks):
     from supabase_client import supabase
-    supabase.auth.sign_out()
-    flask.session.clear()
+    try:
+        supabase.auth.sign_out()
+    except Exception as e:
+        print("Erro ao fazer logout:", e)
+    flask_session.clear()
+    flask_session.modified = True  # Marca a sessão como modificada para garantir que seja salva
     return "/"
 
 @callback(
@@ -247,6 +251,10 @@ def toggle_mobile_menu(n_mais, n_backdrop, style_atual):
 )
 def fazer_logout_mobile(n_clicks):
     from supabase_client import supabase
-    supabase.auth.sign_out()
-    flask.session.clear()
+    try:
+        supabase.auth.sign_out()
+    except Exception as e:
+        print("Erro ao fazer logout:", e)
+    flask_session.clear()
+    flask_session.modified = True  # Marca a sessão como modificada para garantir que seja salva
     return "/"

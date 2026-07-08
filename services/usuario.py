@@ -6,7 +6,7 @@ def buscar_usuario(user_id):
     try:
         registro = executar_com_retry(
             lambda: supabase.table("usuario")
-                .select("nome, perfil")
+                .select("nome, perfil, aprovado")
                 .eq("id", user_id)
                 .single()
                 .execute()
@@ -40,25 +40,30 @@ def eh_financeiro(perfil):
 
 def cadastrar_usuario(email, senha, nome, perfil, admin_id=None):
     try:
-        resposta = supabase_admin.auth.admin.create_user({
+        #resposta = supabase_admin.auth.admin.create_user({
+        dados_usuario = {
             "email": email,
-            "password": senha,
+            #"password": senha,
             "user_metadata": {"full_name": nome},
             "email_confirm": True
-        })
-
+        }
+        if senha:
+            dados_usuario["password"] = senha
+        
+        resposta = supabase_admin.auth.admin.create_user(dados_usuario)
         novo_id = resposta.user.id
         supabase_admin.table("usuario") \
-            .update({"nome": nome, "perfil": perfil}) \
+            .update({"nome": nome, "perfil": perfil, "aprovado":True}) \
             .eq("id", novo_id) \
             .execute()
 
         id_para_log = admin_id if admin_id else resposta.user.id
 
+        tipo = "Google" if not senha else "senha"
         registrar_log(
             id_para_log,
             "USUARIO_CRIADO",
-            f"Usuário '{nome}' ({email}) criado com perfil {perfil}"
+            f"Usuário '{nome}' ({email}) criado via tipo {tipo} com perfil {perfil}"
         )
 
         return True
@@ -127,7 +132,10 @@ def deletar_usuario(user_id, admin_id=None):
         # Ordem: logs -> tabela usuario -> auth.users (FKs em cascata reversa)
         supabase_admin.table("log_sistema").delete().eq("id_usuario", user_id).execute()
         supabase_admin.table("usuario").delete().eq("id", user_id).execute()
-        supabase_admin.auth.admin.delete_user(user_id)
+        #supabase_admin.auth.admin.delete_user(user_id)
+        #print(f"Removendo usuário do Authentication: {user_id}")
+        resultado = supabase_admin.auth.admin.delete_user(user_id)
+        #print("Resultado da exclusão:", resultado)
         return True
 
     except Exception as e:

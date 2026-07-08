@@ -11,7 +11,7 @@ def verificar_duplicatas(transacoes, user_id):
         consulta = (
             supabase.table("transacao")
             .select("*")
-            .eq("id_usuario", user_id)
+            #.eq("id_usuario", user_id)
             .eq("data", transacao["data"])
             .eq("valor", transacao["valor"])
             .eq("descricao", transacao["descricao"])
@@ -64,7 +64,7 @@ def listar_transacoes(user_id):
     return executar_com_retry( lambda:
         supabase.table("transacao")
         .select("*")
-        .eq("id_usuario", user_id)
+        #.eq("id_usuario", user_id)
         .order("data", desc=True)
         .execute()
     )
@@ -80,7 +80,7 @@ def buscar_transacao(id_transacao, user_id):
         supabase.table("transacao")
         .select("*")
         .eq("id_transacao", id_transacao)
-        .eq("id_usuario", user_id)
+        #.eq("id_usuario", user_id)
         .execute()
     )
 
@@ -104,7 +104,7 @@ def editar_transacao(id_transacao, dados, user_id):
         supabase.table("transacao")
         .update(dados)
         .eq("id_transacao", id_transacao)
-        .eq("id_usuario", user_id)
+        #.eq("id_usuario", user_id)
         .execute()
     )
 
@@ -130,7 +130,7 @@ def excluir_transacao(id_transacao, user_id):
         supabase.table("transacao")
         .delete()
         .eq("id_transacao", id_transacao)
-        .eq("id_usuario", user_id)
+        #.eq("id_usuario", user_id)
         .execute()
     )
 
@@ -169,7 +169,7 @@ def listar_transacoes_por_importacao(id_importacao, user_id):
         supabase.table("transacao")
         .select("*")
         .eq("id_importacao", id_importacao)
-        .eq("id_usuario", user_id)
+        #.eq("id_usuario", user_id)
         .order("data", desc=True)
         .execute()
     )

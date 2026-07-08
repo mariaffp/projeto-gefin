@@ -32,6 +32,8 @@ def checar_permissao_antes_de_carregar():
         return redirect("/")  # bloqueia AQUI, antes do Dash processar
 
     usuario = buscar_usuario(session.user.id)
+    if usuario is None or not usuario.get("aprovado"):
+        return redirect("/")  # bloqueia AQUI, antes do Dash processar
     perfil = usuario["perfil"] if usuario else buscar_perfil(session.user.id)
 
     paginas_financeiro = ["/transacoes", "/importacao"]
